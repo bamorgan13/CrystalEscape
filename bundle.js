@@ -81,20 +81,22 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/index.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./lib/crystal_escape.js");
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ "./src/index.js":
-/*!**********************!*\
-  !*** ./src/index.js ***!
-  \**********************/
+/***/ "./lib/crystal_escape.js":
+/*!*******************************!*\
+  !*** ./lib/crystal_escape.js ***!
+  \*******************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-eval("console.log('Webpack is working!');\n\n\n//# sourceURL=webpack:///./src/index.js?");
+console.log('Webpack is working!!');
+
 
 /***/ })
 
 /******/ });
+//# sourceMappingURL=bundle.js.map
