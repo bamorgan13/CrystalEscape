@@ -36,10 +36,10 @@ Grabbing the crystal in each level moves the player on to the next zone, where t
 ### Implementation Timeline
 
 ##### Day 1:
-- [ ] Brainstorm game ideas
-- [ ] Write proposal
-- [ ] Research visual assets
-- [ ] Create basic JavaScript skeleton with Webpack, HTML5 Canvas, and CSS files
+- [x] Brainstorm game ideas
+- [x] Write proposal
+- [x] Research visual assets
+- [x] Create basic JavaScript skeleton with Webpack, HTML5 Canvas, and CSS files
 
 ##### Day 2:
 - [ ] Render backgrounds and ship on canvas
