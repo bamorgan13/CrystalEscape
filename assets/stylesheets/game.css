@@ -1,0 +1,12 @@
+#game-canvas {
+	position: absolute;
+	top: 0;
+}
+#midground-canvas {
+	position: absolute;
+	top: 0;
+}
+#background-canvas {
+	position: absolute;
+	top: 0;
+}
