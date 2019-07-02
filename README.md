@@ -21,7 +21,6 @@ Grabbing the crystal in each level moves the player on to the next zone, where t
 * Vanilla JavaScript will be used for game logic
 * HTML5 Canvas will be used for rendering the game sprites and backgrounds
 * CSS will be used for basic styling of the webpage
-* Webpack will be used to bundle and serve all scripts in a single source
 
 ### MVPs
 - [ ] Title screen with instructions
@@ -39,7 +38,7 @@ Grabbing the crystal in each level moves the player on to the next zone, where t
 - [x] Brainstorm game ideas
 - [x] Write proposal
 - [x] Research visual assets
-- [x] Create basic JavaScript skeleton with Webpack, HTML5 Canvas, and CSS files
+- [x] Create basic JavaScript skeleton with HTML5 Canvas and CSS files
 
 ##### Day 2:
 - [ ] Render backgrounds and ship on canvas
