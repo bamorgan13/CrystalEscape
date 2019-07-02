@@ -6,9 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Crystal Escape</title>
   <link rel="stylesheet" href="./assets/stylesheets/reset.css" type="text/css">
-  <script src="./lib/crystal_escape.js"></script>
+  <script type="module" src="./lib/crystal_escape.js"></script>
 </head>
 <body>
-  <canvas id="game-canvas"></canvas>
+  <canvas id="background-canvas" width="600" height="352"></canvas>
+  <canvas id="midground-canvas" width="600" height="352"></canvas>
+  <canvas tabindex="1" id="game-canvas" width="600" height="352"></canvas>
 </body>
 </html>
