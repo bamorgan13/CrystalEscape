@@ -211,6 +211,7 @@ const Ship = __webpack_require__(/*! ./ship */ "./lib/ship.js");
 class EnemyShip extends Ship {
 	constructor(options) {
 		super(options);
+		this.direction = -1;
 	}
 }
 
@@ -229,7 +230,9 @@ module.exports = EnemyShip;
 const Background = __webpack_require__(/*! ./background */ "./lib/background.js");
 const Ship = __webpack_require__(/*! ./ship */ "./lib/ship.js");
 const Bullet = __webpack_require__(/*! ./bullet */ "./lib/bullet.js");
+const Player = __webpack_require__(/*! ./player */ "./lib/player.js");
 const EnemyShip = __webpack_require__(/*! ./enemy_ship */ "./lib/enemy_ship.js");
+const Util = __webpack_require__(/*! ./util */ "./lib/util.js");
 
 class Game {
 	constructor({ gameCanvas, gameCtx, midgroundCtx, backgroundCtx }) {
@@ -240,49 +243,39 @@ class Game {
 		this.bullets = [];
 
 		this.generateBackground(backgroundCtx, midgroundCtx);
-		this.player = new Ship({
-			pos: [10, 200],
-			vel: [0, 0],
-			path: './assets/images/sprites/ship.png',
-			scale: 2,
-			width: 24,
-			height: 16,
-			game: this
-		});
+		this.player = new Player({ game: this });
 
 		this.draw = this.draw.bind(this);
-		this.handleKeyPress = this.handleKeyPress.bind(this);
+		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyUp = this.handleKeyUp.bind(this);
 		this.gameCanvas.focus();
-		this.gameCanvas.addEventListener('keypress', this.handleKeyPress);
-		this.gameCanvas.addEventListener('keyup', this.handleKeyUp);
+		this.movementListener = this.gameCanvas.addEventListener('keydown', this.handleKeyDown);
+		this.weaponListener = this.gameCanvas.addEventListener(
+			'keyup',
+			Util.throttle(this.handleKeyUp, this.player.weaponLockout)
+		);
 	}
 
 	generateBackground(backgroundCtx, midgroundCtx) {
-		const level = Math.floor(Math.random() * 5) + 1;
+		const level = Math.floor(Math.random() * 5) + 1; //Randomize level for testing
 		this.background = new Background({ ctx: backgroundCtx, type: 'background', level });
 		this.midground = new Background({ ctx: midgroundCtx, type: 'midground', level });
 	}
 
-	handleKeyPress(e) {
-		const player = this.player;
+	handleKeyDown(e) {
 		if (e.code === 'KeyW' || e.code === 'ArrowUp') {
-			player.boost('up', 1);
+			this.player.boost('up');
 		} else if (e.code === 'KeyS' || e.code === 'ArrowDown') {
-			player.boost('down', 1);
-		}
-		if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
-			player.boost('left', 1);
+			this.player.boost('down');
+		} else if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
+			this.player.boost('left');
 		} else if (e.code === 'KeyD' || e.code === 'ArrowRight') {
-			player.boost('right', 1);
+			this.player.boost('right');
 		}
 	}
 
 	handleKeyUp(e) {
-		const player = this.player;
-		if (e.code === 'Space') {
-			player.fire();
-		}
+		if (e.code === 'Space') this.player.fire();
 	}
 
 	add(obj) {
@@ -298,7 +291,6 @@ class Game {
 		this.midground.draw();
 		this.player.draw(this.ctx);
 		this.bullets.forEach(bullet => bullet.draw(this.ctx));
-		// console.log(this.bullets);
 		this.player.move();
 		this.bullets.forEach(bullet => bullet.move());
 	}
@@ -374,18 +366,6 @@ class MovingObject {
 		this.pos[0] += this.vel[0] * this.speedMultiplier;
 		this.pos[1] += this.vel[1] * this.speedMultiplier;
 
-		// if (this.vel[0] > 1) {
-		// 	this.vel[0] -= 0.1;
-		// } else if (this.vel[0] < -1) {
-		// 	this.vel[0] += 0.1;
-		// }
-
-		// if (this.vel[1] > 1) {
-		// 	this.vel[1] -= 0.1;
-		// } else if (this.vel[1] < -1) {
-		// 	this.vel[1] += 0.1;
-		// }
-
 		this.vel[0] *= this.deceleration;
 		this.vel[1] *= this.deceleration;
 
@@ -396,33 +376,6 @@ class MovingObject {
 			this.spriteIndex.y++;
 			this.spriteIndex.y = this.spriteIndex.y % this.spriteIndex.maxY;
 			this.frameCount = 0;
-		}
-
-		// if (this.game.isOutOfBounds(this.pos)) {
-		// 	this.game.remove(this);
-		// }
-	}
-
-	boost(direction, amount) {
-		switch (direction) {
-			case 'up':
-				this.vel[1] -= amount;
-				this.vel[1] = Math.max(this.vel[1], -6);
-				break;
-			case 'down':
-				this.vel[1] += amount;
-				this.vel[1] = Math.min(this.vel[1], 6);
-				break;
-			case 'left':
-				this.vel[0] -= amount;
-				this.vel[0] = Math.max(this.vel[0], -6);
-				break;
-			case 'right':
-				this.vel[0] += amount;
-				this.vel[0] = Math.min(this.vel[0], 6);
-				break;
-			default:
-				break;
 		}
 	}
 
@@ -442,6 +395,79 @@ module.exports = MovingObject;
 
 /***/ }),
 
+/***/ "./lib/player.js":
+/*!***********************!*\
+  !*** ./lib/player.js ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Ship = __webpack_require__(/*! ./ship */ "./lib/ship.js");
+
+class Player extends Ship {
+	constructor(options) {
+		super({
+			path: Player.PATH,
+			scale: Player.SCALE,
+			width: Player.WIDTH,
+			height: Player.HEIGHT,
+			spriteMaxX: Player.SPRITE_MAX_X,
+			spriteMaxY: Player.SPRITE_MAX_Y,
+			pos: Player.STARTING_VARS.POS,
+			vel: Player.STARTING_VARS.VEL,
+			deceleration: Player.STARTING_VARS.DECELERATION,
+			...options
+		});
+		this.direction = 1;
+		this.boostLevel = Player.STARTING_VARS.BOOST_LEVEL;
+		this.topSpeed = Player.STARTING_VARS.TOP_SPEED;
+		this.weaponLockout = Player.STARTING_VARS.WEAPON_LOCKOUT;
+	}
+
+	boost(direction) {
+		switch (direction) {
+			case 'up':
+				this.vel[1] -= this.boostLevel;
+				this.vel[1] = Math.max(this.vel[1], -1 * this.topSpeed);
+				break;
+			case 'down':
+				this.vel[1] += this.boostLevel;
+				this.vel[1] = Math.min(this.vel[1], this.topSpeed);
+				break;
+			case 'left':
+				this.vel[0] -= this.boostLevel;
+				this.vel[0] = Math.max(this.vel[0], -1 * this.topSpeed);
+				break;
+			case 'right':
+				this.vel[0] += this.boostLevel;
+				this.vel[0] = Math.min(this.vel[0], this.topSpeed);
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+Player.PATH = './assets/images/sprites/ship.png';
+Player.SPRITE_MAX_X = 2;
+Player.SPRITE_MAX_Y = 7;
+Player.SCALE = 2;
+Player.WIDTH = 24;
+Player.HEIGHT = 16;
+Player.STARTING_VARS = {
+	DECELERATION: 0.99,
+	WEAPON_LOCKOUT: 300,
+	TOP_SPEED: 6,
+	BOOST_LEVEL: 1,
+	POS: [10, 180],
+	VEL: [0, 0]
+};
+
+module.exports = Player;
+
+
+/***/ }),
+
 /***/ "./lib/ship.js":
 /*!*********************!*\
   !*** ./lib/ship.js ***!
@@ -454,20 +480,16 @@ const Bullet = __webpack_require__(/*! ./bullet */ "./lib/bullet.js");
 
 class Ship extends MovingObject {
 	constructor(options) {
-		super({ ...options, spriteMaxX: 2, spriteMaxY: 7, deceleration: 0.95 });
+		super(options);
 	}
 
 	fire() {
 		const pos = this.pos.slice();
-		pos[0] += this.width * this.scale + 5;
+		pos[0] += this.width * this.scale + 5 * this.direction;
 		pos[1] += (this.height * this.scale - Bullet.HEIGHT - Bullet.SCALE) / 2;
-		const vel = [Math.max(this.vel.slice()[0], 0) + 4, 0];
+		const vel = [Math.max(this.vel.slice()[0], 0) + 4 * this.direction, 0];
 		const bullet = new Bullet({ pos, vel, game: this.game });
-		console.log('ShipPos', this.pos);
-		console.log('ShipYBounds', this.yBounds);
 
-		console.log('BulletPos', bullet.pos);
-		console.log('BulletYBounds', bullet.yBounds);
 		this.game.add(bullet);
 	}
 }
@@ -485,7 +507,7 @@ module.exports = Ship;
 /***/ (function(module, exports) {
 
 const Util = {
-	between(cornerCoords, xBounds, yBounds) {
+	between: (cornerCoords, xBounds, yBounds) => {
 		return (
 			(cornerCoords[0][0] >= xBounds[0] &&
 				cornerCoords[0][0] <= xBounds[1] &&
@@ -504,6 +526,17 @@ const Util = {
 				cornerCoords[3][1] >= yBounds[0] &&
 				cornerCoords[3][1] <= yBounds[1])
 		);
+	},
+
+	throttle: (func, limit) => {
+		let throttled;
+		return (...args) => {
+			if (!throttled) {
+				func(...args);
+				throttled = true;
+				setTimeout(() => (throttled = false), limit);
+			}
+		};
 	}
 };
 
