@@ -41,9 +41,9 @@ Grabbing the crystal in each level moves the player on to the next zone, where t
 - [x] Create basic JavaScript skeleton with HTML5 Canvas and CSS files
 
 ##### Day 2:
-- [ ] Render backgrounds and ship on canvas
-- [ ] Vertical ship movement 
-- [ ] Bullet creation and movement
+- [x] Render backgrounds and ship on canvas
+- [x] Vertical ship movement 
+- [x] Bullet creation and movement
 
 ##### Day 3:
 - [ ] Enemy spawning
