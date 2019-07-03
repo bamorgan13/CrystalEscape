@@ -159,14 +159,16 @@ const MovingObject = __webpack_require__(/*! ./moving_object */ "./lib/moving_ob
 
 class Bullet extends MovingObject {
 	constructor(options) {
-		super({ ...options, path: Bullet.PATH, width: Bullet.WIDTH, height: Bullet.HEIGHT });
+		super({ ...options, path: Bullet.PATH, spriteWidth: Bullet.SPRITE_WIDTH, spriteHeight: Bullet.SPRITE_HEIGHT });
 	}
 }
 
 Bullet.PATH = './assets/images/sprites/bullet.png';
-Bullet.HEIGHT = 8;
-Bullet.WIDTH = 11;
+Bullet.SPRITE_HEIGHT = 8;
+Bullet.SPRITE_WIDTH = 11;
 Bullet.SCALE = 1;
+Bullet.HEIGHT = Bullet.SPRITE_HEIGHT * Bullet.SCALE;
+Bullet.WIDTH = Bullet.SPRITE_WIDTH * Bullet.SCALE;
 
 module.exports = Bullet;
 
@@ -213,8 +215,8 @@ class EnemyShip extends Ship {
 		super({
 			path: EnemyShip.PATH,
 			scale: EnemyShip.SCALE,
-			width: EnemyShip.WIDTH,
-			height: EnemyShip.HEIGHT,
+			spriteWidth: EnemyShip.SPRITE_WIDTH,
+			spriteHeight: EnemyShip.SPRITE_HEIGHT,
 			spriteMaxX: EnemyShip.SPRITE_MAX_X,
 			spriteMaxY: EnemyShip.SPRITE_MAX_Y,
 			// pos: EnemyShip.STARTING_VARS.POS,
@@ -241,14 +243,15 @@ EnemyShip.PATH = './assets/images/sprites/enemy-small.png';
 EnemyShip.SPRITE_MAX_X = 1;
 EnemyShip.SPRITE_MAX_Y = 2;
 EnemyShip.SCALE = 2;
-EnemyShip.WIDTH = 16;
-EnemyShip.HEIGHT = 16;
+EnemyShip.SPRITE_WIDTH = 16;
+EnemyShip.SPRITE_HEIGHT = 16;
+EnemyShip.WIDTH = EnemyShip.SPRITE_WIDTH * EnemyShip.SCALE;
+EnemyShip.HEIGHT = EnemyShip.SPRITE_HEIGHT * EnemyShip.SCALE;
 EnemyShip.STARTING_VARS = {
 	DECELERATION: 1,
 	WEAPON_LOCKOUT: 300,
 	TOP_SPEED: 6,
 	BOOST_LEVEL: 1,
-	// POS: [800, 180],
 	VEL: [-1, 0],
 	FIRE_RATE: 100
 };
@@ -352,7 +355,7 @@ class Game {
 	}
 
 	spawnEnemy() {
-		const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - EnemyShip.HEIGHT * EnemyShip.SCALE + 1))];
+		const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - EnemyShip.HEIGHT + 1))];
 		const enemy = new EnemyShip({ game: this, pos });
 		this.add(enemy);
 	}
@@ -379,8 +382,8 @@ class MovingObject {
 		path,
 		deceleration = 1,
 		scale = 1,
-		width,
-		height,
+		spriteWidth,
+		spriteHeight,
 		game,
 		speedMultiplier = 1,
 		spriteMaxX = 1,
@@ -389,16 +392,18 @@ class MovingObject {
 		this.deceleration = deceleration;
 		this.pos = pos;
 		this.vel = vel;
-		this.width = width;
-		this.height = height;
+		this.spriteWidth = spriteWidth;
+		this.spriteHeight = spriteHeight;
 		this.speedMultiplier = speedMultiplier;
 		this.img = new Image();
 		this.img.src = path;
 		this.spriteIndex = { x: 0, y: 0, maxX: spriteMaxX, maxY: spriteMaxY };
 		this.scale = scale;
+		this.width = this.spriteWidth * this.scale;
+		this.height = this.spriteHeight * this.scale;
 		this.game = game;
-		this.xBounds = [this.pos[0], this.pos[0] + width * scale];
-		this.yBounds = [this.pos[1], this.pos[1] + height * scale];
+		this.xBounds = [this.pos[0], this.pos[0] + this.width];
+		this.yBounds = [this.pos[1], this.pos[1] + this.height];
 		this.cornerCoords = [
 			this.pos,
 			[this.xBounds[1], this.yBounds[0]],
@@ -411,14 +416,14 @@ class MovingObject {
 		if (this.img.naturalWidth > 0) {
 			ctx.drawImage(
 				this.img,
-				0 + this.spriteIndex.x * this.img.naturalWidth / this.spriteIndex.maxX,
-				0 + this.spriteIndex.y * this.img.naturalHeight / this.spriteIndex.maxY,
-				this.img.naturalWidth / this.spriteIndex.maxX,
-				this.img.naturalHeight / this.spriteIndex.maxY,
+				0 + this.spriteIndex.x * this.spriteWidth,
+				0 + this.spriteIndex.y * this.spriteHeight,
+				this.spriteWidth,
+				this.spriteHeight,
 				this.pos[0],
 				this.pos[1],
-				this.img.naturalWidth / this.spriteIndex.maxX * this.scale,
-				this.img.naturalHeight / this.spriteIndex.maxY * this.scale
+				this.width,
+				this.height
 			);
 		}
 	}
@@ -468,8 +473,8 @@ class Player extends Ship {
 		super({
 			path: Player.PATH,
 			scale: Player.SCALE,
-			width: Player.WIDTH,
-			height: Player.HEIGHT,
+			spriteWidth: Player.SPRITE_WIDTH,
+			spriteHeight: Player.SPRITE_HEIGHT,
 			spriteMaxX: Player.SPRITE_MAX_X,
 			spriteMaxY: Player.SPRITE_MAX_Y,
 			pos: Player.STARTING_VARS.POS,
@@ -511,17 +516,17 @@ class Player extends Ship {
 		if (this.pos[0] < 0) {
 			this.vel[0] = 0;
 			this.pos[0] = 1;
-		} else if (this.pos[0] > this.game.gameCanvas.width - this.width * this.scale) {
+		} else if (this.pos[0] > this.game.gameCanvas.width - this.width) {
 			this.vel[0] = 0;
-			this.pos[0] = this.game.gameCanvas.width - this.width * this.scale - 1;
+			this.pos[0] = this.game.gameCanvas.width - this.width - 1;
 		}
 
 		if (this.pos[1] < 0) {
 			this.vel[1] = 0;
 			this.pos[1] = 1;
-		} else if (this.pos[1] > this.game.gameCanvas.height - this.height * this.scale) {
+		} else if (this.pos[1] > this.game.gameCanvas.height - this.height) {
 			this.vel[1] = 0;
-			this.pos[1] = this.game.gameCanvas.height - this.height * this.scale - 1;
+			this.pos[1] = this.game.gameCanvas.height - this.height - 1;
 		}
 		super.move();
 	}
@@ -531,8 +536,8 @@ Player.PATH = './assets/images/sprites/ship.png';
 Player.SPRITE_MAX_X = 2;
 Player.SPRITE_MAX_Y = 7;
 Player.SCALE = 2;
-Player.WIDTH = 24;
-Player.HEIGHT = 16;
+Player.SPRITE_WIDTH = 24;
+Player.SPRITE_HEIGHT = 16;
 Player.STARTING_VARS = {
 	DECELERATION: 0.99,
 	WEAPON_LOCKOUT: 300,
@@ -564,8 +569,8 @@ class Ship extends MovingObject {
 
 	fire() {
 		const pos = this.pos.slice();
-		pos[0] += this.width * this.scale + 20 * this.direction + Math.min(0, this.direction * Bullet.SCALE * Bullet.WIDTH);
-		pos[1] += (this.height * this.scale - Bullet.HEIGHT * Bullet.SCALE) / 2;
+		pos[0] += this.width + 20 * this.direction + Math.min(0, this.direction * Bullet.WIDTH);
+		pos[1] += (this.height - Bullet.HEIGHT) / 2;
 		const vel = [Math.max(this.vel.slice()[0], 0) + 4 * this.direction, 0];
 		const bullet = new Bullet({ pos, vel, game: this.game });
 
