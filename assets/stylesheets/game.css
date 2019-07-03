@@ -1,12 +1,15 @@
 #game-canvas {
 	position: absolute;
 	top: 0;
+	z-index: 3;
 }
 #midground-canvas {
 	position: absolute;
 	top: 0;
+	z-index: 2;
 }
 #background-canvas {
 	position: absolute;
 	top: 0;
+	z-index: 1;
 }

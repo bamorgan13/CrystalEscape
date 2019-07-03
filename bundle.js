@@ -94,7 +94,7 @@
 /***/ (function(module, exports) {
 
 class Background {
-	constructor(ctx, type, level = 1) {
+	constructor({ ctx, type, level = 1 }) {
 		this.ctx = ctx;
 		if (type === 'background') {
 			this.path = `./assets/images/backgrounds/level_${level}/background.png`;
@@ -148,6 +148,31 @@ module.exports = Background;
 
 /***/ }),
 
+/***/ "./lib/bullet.js":
+/*!***********************!*\
+  !*** ./lib/bullet.js ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const MovingObject = __webpack_require__(/*! ./moving_object */ "./lib/moving_object.js");
+
+class Bullet extends MovingObject {
+	constructor(options) {
+		super({ ...options, path: Bullet.PATH, width: Bullet.WIDTH, height: Bullet.HEIGHT });
+	}
+}
+
+Bullet.PATH = './assets/images/sprites/bullet.png';
+Bullet.HEIGHT = 8;
+Bullet.WIDTH = 11;
+Bullet.SCALE = 1;
+
+module.exports = Bullet;
+
+
+/***/ }),
+
 /***/ "./lib/crystal_escape.js":
 /*!*******************************!*\
   !*** ./lib/crystal_escape.js ***!
@@ -167,15 +192,29 @@ document.addEventListener('DOMContentLoaded', () => {
 	const gameCanvas = document.getElementById('game-canvas');
 	const gameCtx = gameCanvas.getContext('2d');
 
-	gameCanvas.addEventListener('keyup', handleKeyPress);
-
-	const game = new Game(gameCanvas, gameCtx, midgroundCtx, backgroundCtx);
+	const game = new Game({ gameCanvas, gameCtx, midgroundCtx, backgroundCtx });
 	game.draw();
 });
 
-function handleKeyPress(e) {
-	console.log(e.code, e.keyCode);
+
+/***/ }),
+
+/***/ "./lib/enemy_ship.js":
+/*!***************************!*\
+  !*** ./lib/enemy_ship.js ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Ship = __webpack_require__(/*! ./ship */ "./lib/ship.js");
+
+class EnemyShip extends Ship {
+	constructor(options) {
+		super(options);
+	}
 }
+
+module.exports = EnemyShip;
 
 
 /***/ }),
@@ -188,30 +227,287 @@ function handleKeyPress(e) {
 /***/ (function(module, exports, __webpack_require__) {
 
 const Background = __webpack_require__(/*! ./background */ "./lib/background.js");
+const Ship = __webpack_require__(/*! ./ship */ "./lib/ship.js");
+const Bullet = __webpack_require__(/*! ./bullet */ "./lib/bullet.js");
+const EnemyShip = __webpack_require__(/*! ./enemy_ship */ "./lib/enemy_ship.js");
 
 class Game {
-	constructor(gameCanvas, gameCtx, midgroundCtx, backgroundCtx) {
+	constructor({ gameCanvas, gameCtx, midgroundCtx, backgroundCtx }) {
 		this.gameCanvas = gameCanvas;
 		this.ctx = gameCtx;
 
+		this.enemies = [];
+		this.bullets = [];
+
 		this.generateBackground(backgroundCtx, midgroundCtx);
+		this.player = new Ship({
+			pos: [10, 200],
+			vel: [0, 0],
+			path: './assets/images/sprites/ship.png',
+			scale: 2,
+			width: 24,
+			height: 16,
+			game: this
+		});
+
 		this.draw = this.draw.bind(this);
+		this.handleKeyPress = this.handleKeyPress.bind(this);
+		this.handleKeyUp = this.handleKeyUp.bind(this);
+		this.gameCanvas.focus();
+		this.gameCanvas.addEventListener('keypress', this.handleKeyPress);
+		this.gameCanvas.addEventListener('keyup', this.handleKeyUp);
 	}
 
 	generateBackground(backgroundCtx, midgroundCtx) {
 		const level = Math.floor(Math.random() * 5) + 1;
-		this.background = new Background(backgroundCtx, 'background', level);
-		this.midground = new Background(midgroundCtx, 'midground', level);
+		this.background = new Background({ ctx: backgroundCtx, type: 'background', level });
+		this.midground = new Background({ ctx: midgroundCtx, type: 'midground', level });
+	}
+
+	handleKeyPress(e) {
+		const player = this.player;
+		if (e.code === 'KeyW' || e.code === 'ArrowUp') {
+			player.boost('up', 1);
+		} else if (e.code === 'KeyS' || e.code === 'ArrowDown') {
+			player.boost('down', 1);
+		}
+		if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
+			player.boost('left', 1);
+		} else if (e.code === 'KeyD' || e.code === 'ArrowRight') {
+			player.boost('right', 1);
+		}
+	}
+
+	handleKeyUp(e) {
+		const player = this.player;
+		if (e.code === 'Space') {
+			player.fire();
+		}
+	}
+
+	add(obj) {
+		if (obj instanceof Bullet) {
+			this.bullets.push(obj);
+		}
 	}
 
 	draw() {
 		requestAnimationFrame(this.draw);
+		this.ctx.clearRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
 		this.background.draw();
 		this.midground.draw();
+		this.player.draw(this.ctx);
+		this.bullets.forEach(bullet => bullet.draw(this.ctx));
+		// console.log(this.bullets);
+		this.player.move();
+		this.bullets.forEach(bullet => bullet.move());
 	}
 }
 
 module.exports = Game;
+
+
+/***/ }),
+
+/***/ "./lib/moving_object.js":
+/*!******************************!*\
+  !*** ./lib/moving_object.js ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Util = __webpack_require__(/*! ./util */ "./lib/util.js");
+
+class MovingObject {
+	constructor({
+		pos,
+		vel,
+		path,
+		deceleration = 1,
+		scale = 1,
+		width,
+		height,
+		game,
+		speedMultiplier = 1,
+		spriteMaxX = 1,
+		spriteMaxY = 1
+	}) {
+		this.deceleration = deceleration;
+		this.pos = pos;
+		this.vel = vel;
+		this.width = width;
+		this.height = height;
+		this.speedMultiplier = speedMultiplier;
+		this.img = new Image();
+		this.img.src = path;
+		this.frameCount = 0;
+		this.spriteIndex = { x: 0, y: 0, maxX: spriteMaxX, maxY: spriteMaxY };
+		this.scale = scale;
+		this.game = game;
+		this.xBounds = [this.pos[0], this.pos[0] + width * scale];
+		this.yBounds = [this.pos[1], this.pos[1] + height * scale];
+		this.cornerCoords = [
+			this.pos,
+			[this.xBounds[1], this.yBounds[0]],
+			[this.xBounds[0], this.yBounds[1]],
+			[this.xBounds[1], this.yBounds[1]]
+		];
+	}
+
+	draw(ctx) {
+		if (this.img.naturalWidth > 0) {
+			ctx.drawImage(
+				this.img,
+				0 + this.spriteIndex.x * this.img.naturalWidth / this.spriteIndex.maxX,
+				0 + this.spriteIndex.y * this.img.naturalHeight / this.spriteIndex.maxY,
+				this.img.naturalWidth / this.spriteIndex.maxX,
+				this.img.naturalHeight / this.spriteIndex.maxY,
+				this.pos[0],
+				this.pos[1],
+				this.img.naturalWidth / this.spriteIndex.maxX * this.scale,
+				this.img.naturalHeight / this.spriteIndex.maxY * this.scale
+			);
+		}
+	}
+
+	move() {
+		this.pos[0] += this.vel[0] * this.speedMultiplier;
+		this.pos[1] += this.vel[1] * this.speedMultiplier;
+
+		// if (this.vel[0] > 1) {
+		// 	this.vel[0] -= 0.1;
+		// } else if (this.vel[0] < -1) {
+		// 	this.vel[0] += 0.1;
+		// }
+
+		// if (this.vel[1] > 1) {
+		// 	this.vel[1] -= 0.1;
+		// } else if (this.vel[1] < -1) {
+		// 	this.vel[1] += 0.1;
+		// }
+
+		this.vel[0] *= this.deceleration;
+		this.vel[1] *= this.deceleration;
+
+		this.frameCount++;
+		if (this.frameCount % 10 === 0) {
+			this.spriteIndex.x++;
+			this.spriteIndex.x = this.spriteIndex.x % this.spriteIndex.maxX;
+			this.spriteIndex.y++;
+			this.spriteIndex.y = this.spriteIndex.y % this.spriteIndex.maxY;
+			this.frameCount = 0;
+		}
+
+		// if (this.game.isOutOfBounds(this.pos)) {
+		// 	this.game.remove(this);
+		// }
+	}
+
+	boost(direction, amount) {
+		switch (direction) {
+			case 'up':
+				this.vel[1] -= amount;
+				this.vel[1] = Math.max(this.vel[1], -6);
+				break;
+			case 'down':
+				this.vel[1] += amount;
+				this.vel[1] = Math.min(this.vel[1], 6);
+				break;
+			case 'left':
+				this.vel[0] -= amount;
+				this.vel[0] = Math.max(this.vel[0], -6);
+				break;
+			case 'right':
+				this.vel[0] += amount;
+				this.vel[0] = Math.min(this.vel[0], 6);
+				break;
+			default:
+				break;
+		}
+	}
+
+	isCollidedWith(otherObject) {
+		return Util.between(this.cornerCoords, otherObject.xBounds, otherObject.yBounds);
+	}
+
+	collideWith(otherObject) {}
+
+	remove() {
+		this.game.remove(this);
+	}
+}
+
+module.exports = MovingObject;
+
+
+/***/ }),
+
+/***/ "./lib/ship.js":
+/*!*********************!*\
+  !*** ./lib/ship.js ***!
+  \*********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const MovingObject = __webpack_require__(/*! ./moving_object */ "./lib/moving_object.js");
+const Bullet = __webpack_require__(/*! ./bullet */ "./lib/bullet.js");
+
+class Ship extends MovingObject {
+	constructor(options) {
+		super({ ...options, spriteMaxX: 2, spriteMaxY: 7, deceleration: 0.95 });
+	}
+
+	fire() {
+		const pos = this.pos.slice();
+		pos[0] += this.width * this.scale + 5;
+		pos[1] += (this.height * this.scale - Bullet.HEIGHT - Bullet.SCALE) / 2;
+		const vel = [Math.max(this.vel.slice()[0], 0) + 4, 0];
+		const bullet = new Bullet({ pos, vel, game: this.game });
+		console.log('ShipPos', this.pos);
+		console.log('ShipYBounds', this.yBounds);
+
+		console.log('BulletPos', bullet.pos);
+		console.log('BulletYBounds', bullet.yBounds);
+		this.game.add(bullet);
+	}
+}
+
+module.exports = Ship;
+
+
+/***/ }),
+
+/***/ "./lib/util.js":
+/*!*********************!*\
+  !*** ./lib/util.js ***!
+  \*********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+const Util = {
+	between(cornerCoords, xBounds, yBounds) {
+		return (
+			(cornerCoords[0][0] >= xBounds[0] &&
+				cornerCoords[0][0] <= xBounds[1] &&
+				cornerCoords[0][1] >= yBounds[0] &&
+				cornerCoords[0][1] <= yBounds[1]) ||
+			(cornerCoords[1][0] >= xBounds[0] &&
+				cornerCoords[1][0] <= xBounds[1] &&
+				cornerCoords[1][1] >= yBounds[0] &&
+				cornerCoords[1][1] <= yBounds[1]) ||
+			(cornerCoords[2][0] >= xBounds[0] &&
+				cornerCoords[2][0] <= xBounds[1] &&
+				cornerCoords[2][1] >= yBounds[0] &&
+				cornerCoords[2][1] <= yBounds[1]) ||
+			(cornerCoords[3][0] >= xBounds[0] &&
+				cornerCoords[3][0] <= xBounds[1] &&
+				cornerCoords[3][1] >= yBounds[0] &&
+				cornerCoords[3][1] <= yBounds[1])
+		);
+	}
+};
+
+module.exports = Util;
 
 
 /***/ })
