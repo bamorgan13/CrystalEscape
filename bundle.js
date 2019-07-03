@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const gameCtx = gameCanvas.getContext('2d');
 
 	const game = new Game({ gameCanvas, gameCtx, midgroundCtx, backgroundCtx });
-	game.draw();
+	game.step();
 });
 
 
@@ -290,7 +290,7 @@ class Game {
 		this.generateBackground(backgroundCtx, midgroundCtx);
 		this.player = new Player({ game: this });
 
-		this.draw = this.draw.bind(this);
+		this.step = this.step.bind(this);
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyPress = this.handleKeyPress.bind(this);
 		this.spawnEnemy = this.spawnEnemy.bind(this);
@@ -334,21 +334,16 @@ class Game {
 		}
 	}
 
-	draw() {
-		requestAnimationFrame(this.draw);
+	step() {
+		requestAnimationFrame(this.step);
 		this.ctx.clearRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
-		this.player.move();
-		this.enemies.forEach(enemy => enemy.move());
-		this.bullets.forEach(bullet => bullet.move());
+		this.allObjects().forEach(obj => obj.move());
 		this.background.draw();
 		this.midground.draw();
-		this.player.draw(this.ctx);
-		this.bullets.forEach(bullet => bullet.draw(this.ctx));
-		this.enemies.forEach(enemy => enemy.draw(this.ctx));
+		this.allObjects().forEach(obj => obj.draw(this.ctx));
 
 		if (this.frameIndex % this.minSpawnRateFrames === 0 && Math.random() < this.spawnChance) {
 			this.spawnEnemy();
-			console.log(this.frameIndex);
 			this.frameIndex = 1;
 		}
 		this.frameIndex++;
@@ -358,6 +353,18 @@ class Game {
 		const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - EnemyShip.HEIGHT + 1))];
 		const enemy = new EnemyShip({ game: this, pos });
 		this.add(enemy);
+	}
+
+	allObjects() {
+		return [].concat(this.player, ...this.bullets, ...this.enemies);
+	}
+
+	remove(obj) {
+		if (obj instanceof Bullet) {
+			this.bullets = this.bullets.filter(bullet => bullet != obj);
+		} else if (obj instanceof EnemyShip) {
+			this.enemies = this.enemies.filter(enemy => enemy != obj);
+		}
 	}
 }
 
@@ -441,6 +448,8 @@ class MovingObject {
 			this.spriteIndex.y++;
 			this.spriteIndex.y = this.spriteIndex.y % this.spriteIndex.maxY;
 		}
+
+		if (this.pos[0] < -1 * this.width || this.pos[0] > this.game.gameCanvas.width) this.remove();
 	}
 
 	isCollidedWith(otherObject) {
