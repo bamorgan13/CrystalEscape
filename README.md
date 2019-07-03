@@ -24,8 +24,8 @@ Grabbing the crystal in each level moves the player on to the next zone, where t
 
 ### MVPs
 - [ ] Title screen with instructions
-- [ ] Ship can move along the vertical axis and fire weapon with player input
-- [ ] Enemies are created and horizontal positions scroll automatically
+- [x] Ship can move along the vertical axis and fire weapon with player input
+- [x] Enemies are created and horizontal positions scroll automatically
 - [ ] Collision with enemies triggers ship destruction
 - [ ] Weapon collision with enemies triggers enemy destruction
 - [ ] Powerups affect game variables (increased speed, bullet size, etc.)
@@ -46,8 +46,8 @@ Grabbing the crystal in each level moves the player on to the next zone, where t
 - [x] Bullet creation and movement
 
 ##### Day 3:
-- [ ] Enemy spawning
-- [ ] Scrolling of background and enemies
+- [x] Enemy spawning
+- [x] Scrolling of background and enemies
 
 ##### Day 4:
 - [ ] Ship collision triggers destruction
