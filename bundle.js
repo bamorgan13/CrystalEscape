@@ -226,6 +226,14 @@ class EnemyShip extends Ship {
 		this.boostLevel = EnemyShip.STARTING_VARS.BOOST_LEVEL;
 		this.topSpeed = EnemyShip.STARTING_VARS.TOP_SPEED;
 		this.weaponLockout = EnemyShip.STARTING_VARS.WEAPON_LOCKOUT;
+		this.fireRate = EnemyShip.STARTING_VARS.FIRE_RATE;
+
+		this.draw = this.draw.bind(this);
+	}
+
+	draw(ctx) {
+		super.draw(ctx);
+		if (this.game.frameIndex % this.fireRate === 0) this.fire();
 	}
 }
 
@@ -241,7 +249,8 @@ EnemyShip.STARTING_VARS = {
 	TOP_SPEED: 6,
 	BOOST_LEVEL: 1,
 	// POS: [800, 180],
-	VEL: [-1, 0]
+	VEL: [-1, 0],
+	FIRE_RATE: 100
 };
 
 module.exports = EnemyShip;
@@ -325,14 +334,14 @@ class Game {
 	draw() {
 		requestAnimationFrame(this.draw);
 		this.ctx.clearRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
+		this.player.move();
+		this.enemies.forEach(enemy => enemy.move());
+		this.bullets.forEach(bullet => bullet.move());
 		this.background.draw();
 		this.midground.draw();
 		this.player.draw(this.ctx);
 		this.bullets.forEach(bullet => bullet.draw(this.ctx));
 		this.enemies.forEach(enemy => enemy.draw(this.ctx));
-		this.player.move();
-		this.bullets.forEach(bullet => bullet.move());
-		this.enemies.forEach(enemy => enemy.move());
 
 		if (this.frameIndex % this.minSpawnRateFrames === 0 && Math.random() < this.spawnChance) {
 			this.spawnEnemy();
@@ -496,6 +505,26 @@ class Player extends Ship {
 				break;
 		}
 	}
+
+	move() {
+		//Restrict movement to window
+		if (this.pos[0] < 0) {
+			this.vel[0] = 0;
+			this.pos[0] = 1;
+		} else if (this.pos[0] > this.game.gameCanvas.width - this.width * this.scale) {
+			this.vel[0] = 0;
+			this.pos[0] = this.game.gameCanvas.width - this.width * this.scale - 1;
+		}
+
+		if (this.pos[1] < 0) {
+			this.vel[1] = 0;
+			this.pos[1] = 1;
+		} else if (this.pos[1] > this.game.gameCanvas.height - this.height * this.scale) {
+			this.vel[1] = 0;
+			this.pos[1] = this.game.gameCanvas.height - this.height * this.scale - 1;
+		}
+		super.move();
+	}
 }
 
 Player.PATH = './assets/images/sprites/ship.png';
@@ -535,7 +564,7 @@ class Ship extends MovingObject {
 
 	fire() {
 		const pos = this.pos.slice();
-		pos[0] += this.width * this.scale + 5 * this.direction;
+		pos[0] += this.width * this.scale + 20 * this.direction + Math.min(0, this.direction * Bullet.SCALE * Bullet.WIDTH);
 		pos[1] += (this.height * this.scale - Bullet.HEIGHT * Bullet.SCALE) / 2;
 		const vel = [Math.max(this.vel.slice()[0], 0) + 4 * this.direction, 0];
 		const bullet = new Bullet({ pos, vel, game: this.game });
