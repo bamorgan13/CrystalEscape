@@ -326,22 +326,12 @@ class Game {
 		this.step = this.step.bind(this);
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyPress = this.handleKeyPress.bind(this);
-		this.spawnEnemy = this.spawnEnemy.bind(this);
-		this.checkCollisions = this.checkCollisions.bind(this);
-		this.remove = this.remove.bind(this);
-		this.add = this.add.bind(this);
-		this.allObjects = this.allObjects.bind(this);
-		this.generateBackground = this.generateBackground.bind(this);
-		this.reset = this.reset.bind(this);
-		this.levelUp = this.levelUp.bind(this);
 
 		this.gameCanvas.focus();
 
-		this.movementListener = this.gameCanvas.addEventListener('keydown', this.handleKeyDown);
-		this.weaponListener = this.gameCanvas.addEventListener(
-			'keypress',
-			Util.throttle(this.handleKeyPress, this.player.weaponLockout)
-		);
+		this.gameCanvas.addEventListener('keydown', this.handleKeyDown);
+		this.throttledPress = Util.throttle(this.handleKeyPress, this.player.weaponLockout);
+		this.gameCanvas.addEventListener('keypress', this.throttledPress);
 	}
 
 	generateBackground() {
@@ -448,7 +438,8 @@ class Game {
 						obj1.remove();
 						obj2.remove();
 					} else if (obj1.isCollidedWith(obj2) && obj1 instanceof Player && obj2 instanceof Powerup) {
-						console.log(obj1, obj2);
+						console.log(obj2.type);
+						this.player.addPowerup(obj2);
 						obj2.remove();
 					}
 				});
@@ -627,6 +618,7 @@ module.exports = MovingObject;
 /***/ (function(module, exports, __webpack_require__) {
 
 const Ship = __webpack_require__(/*! ./ship */ "./lib/ship.js");
+const Util = __webpack_require__(/*! ./util */ "./lib/util.js");
 
 class Player extends Ship {
 	constructor(options) {
@@ -649,6 +641,8 @@ class Player extends Ship {
 		this.weaponLockout = Player.STARTING_VARS.WEAPON_LOCKOUT;
 		this.bulletScale = Player.STARTING_VARS.BULLET_SCALE;
 		this.bulletSpeed = Player.STARTING_VARS.BULLET_SPEED;
+
+		this.addPowerup = this.addPowerup.bind(this);
 	}
 
 	boost(direction) {
@@ -692,6 +686,26 @@ class Player extends Ship {
 			this.pos[1] = this.game.gameCanvas.height - this.height - 1;
 		}
 		super.move();
+	}
+
+	addPowerup(powerup) {
+		switch (powerup.type) {
+			case 'increaseBulletSize':
+				this.bulletScale *= 1.5;
+				break;
+			case 'increaseBulletSpeed':
+				this.bulletSpeed *= 1.5;
+				break;
+			case 'increaseBoost':
+				this.boostLevel *= 1.5;
+				break;
+			case 'fasterReload':
+				this.weaponLockout /= 1.5;
+				this.game.gameCanvas.removeEventListener('keypress', this.game.throttledPress);
+				this.game.throttledPress = Util.throttle(this.game.handleKeyPress, this.weaponLockout);
+				this.game.gameCanvas.addEventListener('keypress', this.game.throttledPress);
+				break;
+		}
 	}
 }
 
@@ -739,6 +753,21 @@ class Powerup extends StaticObject {
 			spriteYOffset: Powerup.SPRITE_HEIGHT * options.index,
 			...options
 		});
+
+		switch (options.index) {
+			case 0:
+				this.type = 'increaseBulletSize';
+				break;
+			case 1:
+				this.type = 'increaseBulletSpeed';
+				break;
+			case 2:
+				this.type = 'increaseBoost';
+				break;
+			case 3:
+				this.type = 'fasterReload';
+				break;
+		}
 
 		this.draw = this.draw.bind(this);
 	}
