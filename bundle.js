@@ -97,10 +97,10 @@ class Background {
 	constructor({ ctx, type, level = 1 }) {
 		this.ctx = ctx;
 		if (type === 'background') {
-			this.path = `./assets/images/backgrounds/level_${level}/background.png`;
+			this.path = `./assets/images/backgrounds/level_${Math.max(level % 6, 1)}/background.png`;
 			this.scrollSpeed = 1 + level * 0.1;
 		} else {
-			this.path = `./assets/images/backgrounds/level_${level}/midground.png`;
+			this.path = `./assets/images/backgrounds/level_${Math.max(level % 6, 1)}/midground.png`;
 			this.scrollSpeed = 2 + level * 0.2;
 		}
 		this.x = 0;
@@ -296,12 +296,16 @@ const SmallEnemy = __webpack_require__(/*! ./small_enemy */ "./lib/small_enemy.j
 const MediumEnemy = __webpack_require__(/*! ./medium_enemy */ "./lib/medium_enemy.js");
 const LargeEnemy = __webpack_require__(/*! ./large_enemy */ "./lib/large_enemy.js");
 const Explosion = __webpack_require__(/*! ./explosion */ "./lib/explosion.js");
+const Score = __webpack_require__(/*! ./score */ "./lib/score.js");
 const Util = __webpack_require__(/*! ./util */ "./lib/util.js");
 
 class Game {
 	constructor({ gameCanvas, gameCtx, midgroundCtx, backgroundCtx }) {
 		this.gameCanvas = gameCanvas;
 		this.ctx = gameCtx;
+
+		this.midgroundCtx = midgroundCtx;
+		this.backgroundCtx = backgroundCtx;
 
 		this.frameIndex = 1;
 		this.minSpawnRateFrames = 50;
@@ -311,9 +315,11 @@ class Game {
 		this.bullets = [];
 		this.explosions = [];
 
-		this.generateBackground(backgroundCtx, midgroundCtx);
+		this.generateBackground();
 		this.player = new Player({ game: this });
 
+		this.level = 1;
+		this.score = new Score({ game: this });
 		this.step = this.step.bind(this);
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyPress = this.handleKeyPress.bind(this);
@@ -322,6 +328,8 @@ class Game {
 		this.remove = this.remove.bind(this);
 		this.add = this.add.bind(this);
 		this.allObjects = this.allObjects.bind(this);
+		this.generateBackground = this.generateBackground.bind(this);
+		this.reset = this.reset.bind(this);
 
 		this.gameCanvas.focus();
 
@@ -332,10 +340,9 @@ class Game {
 		);
 	}
 
-	generateBackground(backgroundCtx, midgroundCtx) {
-		const level = Math.floor(Math.random() * 5) + 1; //Randomize level for testing
-		this.background = new Background({ ctx: backgroundCtx, type: 'background', level });
-		this.midground = new Background({ ctx: midgroundCtx, type: 'midground', level });
+	generateBackground() {
+		this.background = new Background({ ctx: this.backgroundCtx, type: 'background', level: this.level });
+		this.midground = new Background({ ctx: this.midgroundCtx, type: 'midground', level: this.level });
 	}
 
 	handleKeyDown(e) {
@@ -377,11 +384,13 @@ class Game {
 			this.bullets = this.bullets.filter(bullet => bullet != obj);
 		} else if (obj instanceof EnemyShip) {
 			this.enemies = this.enemies.filter(enemy => enemy != obj);
+			this.score.addPoints(obj.basePoints);
 			this.add(new Explosion({ pos: obj.pos, game: this }));
 		} else if (obj instanceof Explosion) {
 			this.explosions = this.explosions.filter(explosion => explosion != obj);
 		} else if (obj instanceof Player) {
-			alert('You dead');
+			alert(`You died :( Score: ${this.score.currentScore}`);
+			this.reset();
 		}
 	}
 
@@ -392,10 +401,19 @@ class Game {
 		this.checkCollisions();
 		this.background.draw();
 		this.midground.draw();
+		this.score.draw(this.ctx);
 		this.allObjects().forEach(obj => obj.draw(this.ctx));
 
 		if (this.frameIndex % this.minSpawnRateFrames === 0 && Math.random() < this.spawnChance) {
 			this.spawnEnemy();
+		}
+		// if (this.score.currentScore > 5000) {
+		// 	alert(`You win! Score: ${this.score.currentScore}`);
+		// 	this.reset();
+		// }
+		if (this.score.currentScore / 1000 >= this.level) {
+			this.level++;
+			this.generateBackground();
 		}
 		if (this.frameIndex === 10000) this.frameIndex = 0;
 		this.frameIndex++;
@@ -418,14 +436,26 @@ class Game {
 	}
 
 	checkCollisions() {
-		this.allObjects().forEach(obj1 => {
-			this.allObjects().forEach(obj2 => {
-				if (obj1 != obj2 && obj1.isCollidedWith(obj2) && obj1.direction === -1 * obj2.direction) {
-					obj1.remove();
-					obj2.remove();
-				}
-			});
+		this.allObjects().forEach((obj1, startIdx) => {
+			this.allObjects()
+				.slice(startIdx + 1) //Prevent checking multiple times
+				.forEach(obj2 => {
+					if (obj1.isCollidedWith(obj2) && obj1.direction === -1 * obj2.direction) {
+						obj1.remove();
+						obj2.remove();
+					}
+				});
 		});
+	}
+
+	// Clear enemies, bullets, and explosions. Reset score to 0 and level to 1. Generate level 1 backgrounds.
+	reset() {
+		this.enemies = [];
+		this.bullets = [];
+		this.explosions = [];
+		this.score.currentScore = 0;
+		this.level = 1;
+		this.generateBackground();
 	}
 }
 
@@ -459,6 +489,7 @@ class LargeEnemy extends EnemyShip {
 		this.fireRate = LargeEnemy.STARTING_VARS.FIRE_RATE;
 		this.bulletScale = LargeEnemy.STARTING_VARS.BULLET_SCALE;
 		this.bulletSpeed = LargeEnemy.STARTING_VARS.BULLET_SPEED;
+		this.basePoints = LargeEnemy.STARTING_VARS.BASE_POINTS;
 	}
 }
 
@@ -475,7 +506,8 @@ LargeEnemy.STARTING_VARS = {
 	VEL: [-0.5, 0],
 	FIRE_RATE: 300,
 	BULLET_SCALE: 4,
-	BULLET_SPEED: 2
+	BULLET_SPEED: 2,
+	BASE_POINTS: 500
 };
 
 module.exports = LargeEnemy;
@@ -508,6 +540,7 @@ class MediumEnemy extends EnemyShip {
 		this.fireRate = MediumEnemy.STARTING_VARS.FIRE_RATE;
 		this.bulletScale = MediumEnemy.STARTING_VARS.BULLET_SCALE;
 		this.bulletSpeed = MediumEnemy.STARTING_VARS.BULLET_SPEED;
+		this.basePoints = MediumEnemy.STARTING_VARS.BASE_POINTS;
 	}
 }
 
@@ -524,7 +557,8 @@ MediumEnemy.STARTING_VARS = {
 	VEL: [-0.8, 0],
 	FIRE_RATE: 150,
 	BULLET_SCALE: 1.5,
-	BULLET_SPEED: 3
+	BULLET_SPEED: 3,
+	BASE_POINTS: 250
 };
 
 module.exports = MediumEnemy;
@@ -665,6 +699,49 @@ module.exports = Player;
 
 /***/ }),
 
+/***/ "./lib/score.js":
+/*!**********************!*\
+  !*** ./lib/score.js ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+class Score {
+	constructor({ game }) {
+		this.currentScore = 0;
+		this.framesDrawn = 0;
+		this.multiplier = 1;
+		this.game = game;
+	}
+
+	draw(ctx) {
+		ctx.font = '20px Arial';
+		ctx.fillStyle = 'white';
+		ctx.lineWidth = 1;
+		ctx.strokeStyle = 'black';
+		ctx.fillText('SCORE:', 10, 20);
+		ctx.strokeText('SCORE:', 10, 20);
+		ctx.fillText(this.currentScore, 90, 20);
+		ctx.strokeText(this.currentScore, 90, 20);
+		ctx.fillText('LEVEL:', 10, 50);
+		ctx.strokeText('LEVEL:', 10, 50);
+		ctx.fillText(this.game.level, 80, 50);
+		ctx.strokeText(this.game.level, 80, 50);
+
+		this.framesDrawn++;
+		if (this.framesDrawn % 10 === 0) this.currentScore += this.multiplier;
+	}
+
+	addPoints(basePoints) {
+		this.currentScore += basePoints * this.multiplier;
+	}
+}
+
+module.exports = Score;
+
+
+/***/ }),
+
 /***/ "./lib/ship.js":
 /*!*********************!*\
   !*** ./lib/ship.js ***!
@@ -721,6 +798,7 @@ class SmallEnemy extends EnemyShip {
 		this.fireRate = SmallEnemy.STARTING_VARS.FIRE_RATE;
 		this.bulletScale = SmallEnemy.STARTING_VARS.BULLET_SCALE;
 		this.bulletSpeed = SmallEnemy.STARTING_VARS.BULLET_SPEED;
+		this.basePoints = SmallEnemy.STARTING_VARS.BASE_POINTS;
 	}
 }
 
@@ -737,7 +815,8 @@ SmallEnemy.STARTING_VARS = {
 	VEL: [-1, 0],
 	FIRE_RATE: 100,
 	BULLET_SCALE: 1,
-	BULLET_SPEED: 4
+	BULLET_SPEED: 4,
+	BASE_POINTS: 100
 };
 
 module.exports = SmallEnemy;
