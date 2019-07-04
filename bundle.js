@@ -213,20 +213,10 @@ const Ship = __webpack_require__(/*! ./ship */ "./lib/ship.js");
 class EnemyShip extends Ship {
 	constructor(options) {
 		super({
-			path: EnemyShip.PATH,
-			scale: EnemyShip.SCALE,
-			spriteWidth: EnemyShip.SPRITE_WIDTH,
-			spriteHeight: EnemyShip.SPRITE_HEIGHT,
-			spriteMaxX: EnemyShip.SPRITE_MAX_X,
-			spriteMaxY: EnemyShip.SPRITE_MAX_Y,
-			vel: EnemyShip.STARTING_VARS.VEL,
-			deceleration: EnemyShip.STARTING_VARS.DECELERATION,
+			deceleration: EnemyShip.DECELERATION,
 			direction: EnemyShip.DIRECTION,
 			...options
 		});
-		this.topSpeed = EnemyShip.STARTING_VARS.TOP_SPEED;
-		this.fireRate = EnemyShip.STARTING_VARS.FIRE_RATE;
-		this.bulletScale = EnemyShip.STARTING_VARS.BULLET_SCALE;
 
 		this.draw = this.draw.bind(this);
 	}
@@ -237,22 +227,8 @@ class EnemyShip extends Ship {
 	}
 }
 
-EnemyShip.PATH = './assets/images/sprites/enemy-small.png';
-EnemyShip.SPRITE_MAX_X = 1;
-EnemyShip.SPRITE_MAX_Y = 2;
-EnemyShip.SCALE = 2;
-EnemyShip.SPRITE_WIDTH = 16;
-EnemyShip.SPRITE_HEIGHT = 16;
-EnemyShip.WIDTH = EnemyShip.SPRITE_WIDTH * EnemyShip.SCALE;
-EnemyShip.HEIGHT = EnemyShip.SPRITE_HEIGHT * EnemyShip.SCALE;
 EnemyShip.DIRECTION = -1;
-EnemyShip.STARTING_VARS = {
-	DECELERATION: 1,
-	TOP_SPEED: 6,
-	VEL: [-1, 0],
-	FIRE_RATE: 100,
-	BULLET_SCALE: 1
-};
+EnemyShip.DECELERATION = 1;
 
 module.exports = EnemyShip;
 
@@ -316,6 +292,9 @@ const Ship = __webpack_require__(/*! ./ship */ "./lib/ship.js");
 const Bullet = __webpack_require__(/*! ./bullet */ "./lib/bullet.js");
 const Player = __webpack_require__(/*! ./player */ "./lib/player.js");
 const EnemyShip = __webpack_require__(/*! ./enemy_ship */ "./lib/enemy_ship.js");
+const SmallEnemy = __webpack_require__(/*! ./small_enemy */ "./lib/small_enemy.js");
+const MediumEnemy = __webpack_require__(/*! ./medium_enemy */ "./lib/medium_enemy.js");
+const LargeEnemy = __webpack_require__(/*! ./large_enemy */ "./lib/large_enemy.js");
 const Explosion = __webpack_require__(/*! ./explosion */ "./lib/explosion.js");
 const Util = __webpack_require__(/*! ./util */ "./lib/util.js");
 
@@ -423,8 +402,18 @@ class Game {
 	}
 
 	spawnEnemy() {
-		const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - EnemyShip.HEIGHT + 1))];
-		const enemy = new EnemyShip({ game: this, pos });
+		let enemy;
+		const rand = Math.random();
+		if (rand < 0.5) {
+			const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - SmallEnemy.HEIGHT + 1))];
+			enemy = new SmallEnemy({ game: this, pos });
+		} else if (rand < 0.8) {
+			const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - MediumEnemy.HEIGHT + 1))];
+			enemy = new MediumEnemy({ game: this, pos });
+		} else {
+			const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - LargeEnemy.HEIGHT + 1))];
+			enemy = new LargeEnemy({ game: this, pos });
+		}
 		this.add(enemy);
 	}
 
@@ -441,6 +430,104 @@ class Game {
 }
 
 module.exports = Game;
+
+
+/***/ }),
+
+/***/ "./lib/large_enemy.js":
+/*!****************************!*\
+  !*** ./lib/large_enemy.js ***!
+  \****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const EnemyShip = __webpack_require__(/*! ./enemy_ship */ "./lib/enemy_ship.js");
+
+class LargeEnemy extends EnemyShip {
+	constructor(options) {
+		super({
+			path: LargeEnemy.PATH,
+			scale: LargeEnemy.SCALE,
+			spriteWidth: LargeEnemy.SPRITE_WIDTH,
+			spriteHeight: LargeEnemy.SPRITE_HEIGHT,
+			spriteMaxX: LargeEnemy.SPRITE_MAX_X,
+			spriteMaxY: LargeEnemy.SPRITE_MAX_Y,
+			vel: LargeEnemy.STARTING_VARS.VEL,
+			...options
+		});
+		this.topSpeed = LargeEnemy.STARTING_VARS.TOP_SPEED;
+		this.fireRate = LargeEnemy.STARTING_VARS.FIRE_RATE;
+		this.bulletScale = LargeEnemy.STARTING_VARS.BULLET_SCALE;
+		this.bulletSpeed = LargeEnemy.STARTING_VARS.BULLET_SPEED;
+	}
+}
+
+LargeEnemy.PATH = './assets/images/sprites/enemy-large.png';
+LargeEnemy.SPRITE_MAX_X = 1;
+LargeEnemy.SPRITE_MAX_Y = 2;
+LargeEnemy.SCALE = 2;
+LargeEnemy.SPRITE_WIDTH = 32;
+LargeEnemy.SPRITE_HEIGHT = 32;
+LargeEnemy.WIDTH = LargeEnemy.SPRITE_WIDTH * LargeEnemy.SCALE;
+LargeEnemy.HEIGHT = LargeEnemy.SPRITE_HEIGHT * LargeEnemy.SCALE;
+LargeEnemy.STARTING_VARS = {
+	TOP_SPEED: 6,
+	VEL: [-0.5, 0],
+	FIRE_RATE: 300,
+	BULLET_SCALE: 4,
+	BULLET_SPEED: 2
+};
+
+module.exports = LargeEnemy;
+
+
+/***/ }),
+
+/***/ "./lib/medium_enemy.js":
+/*!*****************************!*\
+  !*** ./lib/medium_enemy.js ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const EnemyShip = __webpack_require__(/*! ./enemy_ship */ "./lib/enemy_ship.js");
+
+class MediumEnemy extends EnemyShip {
+	constructor(options) {
+		super({
+			path: MediumEnemy.PATH,
+			scale: MediumEnemy.SCALE,
+			spriteWidth: MediumEnemy.SPRITE_WIDTH,
+			spriteHeight: MediumEnemy.SPRITE_HEIGHT,
+			spriteMaxX: MediumEnemy.SPRITE_MAX_X,
+			spriteMaxY: MediumEnemy.SPRITE_MAX_Y,
+			vel: MediumEnemy.STARTING_VARS.VEL,
+			...options
+		});
+		this.topSpeed = MediumEnemy.STARTING_VARS.TOP_SPEED;
+		this.fireRate = MediumEnemy.STARTING_VARS.FIRE_RATE;
+		this.bulletScale = MediumEnemy.STARTING_VARS.BULLET_SCALE;
+		this.bulletSpeed = MediumEnemy.STARTING_VARS.BULLET_SPEED;
+	}
+}
+
+MediumEnemy.PATH = './assets/images/sprites/enemy-medium.png';
+MediumEnemy.SPRITE_MAX_X = 1;
+MediumEnemy.SPRITE_MAX_Y = 2;
+MediumEnemy.SCALE = 2;
+MediumEnemy.SPRITE_WIDTH = 16;
+MediumEnemy.SPRITE_HEIGHT = 32;
+MediumEnemy.WIDTH = MediumEnemy.SPRITE_WIDTH * MediumEnemy.SCALE;
+MediumEnemy.HEIGHT = MediumEnemy.SPRITE_HEIGHT * MediumEnemy.SCALE;
+MediumEnemy.STARTING_VARS = {
+	TOP_SPEED: 6,
+	VEL: [-0.8, 0],
+	FIRE_RATE: 150,
+	BULLET_SCALE: 1.5,
+	BULLET_SPEED: 3
+};
+
+module.exports = MediumEnemy;
 
 
 /***/ }),
@@ -508,6 +595,7 @@ class Player extends Ship {
 		this.topSpeed = Player.STARTING_VARS.TOP_SPEED;
 		this.weaponLockout = Player.STARTING_VARS.WEAPON_LOCKOUT;
 		this.bulletScale = Player.STARTING_VARS.BULLET_SCALE;
+		this.bulletSpeed = Player.STARTING_VARS.BULLET_SPEED;
 	}
 
 	boost(direction) {
@@ -565,6 +653,7 @@ Player.STARTING_VARS = {
 	DECELERATION: 0.99,
 	WEAPON_LOCKOUT: 300,
 	BULLET_SCALE: 1,
+	BULLET_SPEED: 4,
 	TOP_SPEED: 6,
 	BOOST_LEVEL: 1,
 	POS: [10, 180],
@@ -595,7 +684,7 @@ class Ship extends MovingObject {
 		const pos = this.pos.slice();
 		pos[0] = this.direction > 0 ? pos[0] + this.width + 1 : pos[0] - Bullet.SPRITE_WIDTH * this.bulletScale - 1;
 		pos[1] += (this.height - Bullet.SPRITE_HEIGHT * this.bulletScale) / 2;
-		const vel = [Math.max(this.vel.slice()[0], 0) + 4 * this.direction, 0];
+		const vel = [Math.max(this.vel.slice()[0], 0) + this.direction * this.bulletSpeed, 0];
 		const bullet = new Bullet({ pos, vel, game: this.game, scale: this.bulletScale, direction: this.direction });
 
 		this.game.add(bullet);
@@ -603,6 +692,55 @@ class Ship extends MovingObject {
 }
 
 module.exports = Ship;
+
+
+/***/ }),
+
+/***/ "./lib/small_enemy.js":
+/*!****************************!*\
+  !*** ./lib/small_enemy.js ***!
+  \****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const EnemyShip = __webpack_require__(/*! ./enemy_ship */ "./lib/enemy_ship.js");
+
+class SmallEnemy extends EnemyShip {
+	constructor(options) {
+		super({
+			path: SmallEnemy.PATH,
+			scale: SmallEnemy.SCALE,
+			spriteWidth: SmallEnemy.SPRITE_WIDTH,
+			spriteHeight: SmallEnemy.SPRITE_HEIGHT,
+			spriteMaxX: SmallEnemy.SPRITE_MAX_X,
+			spriteMaxY: SmallEnemy.SPRITE_MAX_Y,
+			vel: SmallEnemy.STARTING_VARS.VEL,
+			...options
+		});
+		this.topSpeed = SmallEnemy.STARTING_VARS.TOP_SPEED;
+		this.fireRate = SmallEnemy.STARTING_VARS.FIRE_RATE;
+		this.bulletScale = SmallEnemy.STARTING_VARS.BULLET_SCALE;
+		this.bulletSpeed = SmallEnemy.STARTING_VARS.BULLET_SPEED;
+	}
+}
+
+SmallEnemy.PATH = './assets/images/sprites/enemy-small.png';
+SmallEnemy.SPRITE_MAX_X = 1;
+SmallEnemy.SPRITE_MAX_Y = 2;
+SmallEnemy.SCALE = 2;
+SmallEnemy.SPRITE_WIDTH = 16;
+SmallEnemy.SPRITE_HEIGHT = 16;
+SmallEnemy.WIDTH = SmallEnemy.SPRITE_WIDTH * SmallEnemy.SCALE;
+SmallEnemy.HEIGHT = SmallEnemy.SPRITE_HEIGHT * SmallEnemy.SCALE;
+SmallEnemy.STARTING_VARS = {
+	TOP_SPEED: 6,
+	VEL: [-1, 0],
+	FIRE_RATE: 100,
+	BULLET_SCALE: 1,
+	BULLET_SPEED: 4
+};
+
+module.exports = SmallEnemy;
 
 
 /***/ }),
