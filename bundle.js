@@ -222,10 +222,10 @@ class EnemyShip extends Ship {
 			// pos: EnemyShip.STARTING_VARS.POS,
 			vel: EnemyShip.STARTING_VARS.VEL,
 			deceleration: EnemyShip.STARTING_VARS.DECELERATION,
+			direction: EnemyShip.DIRECTION,
 			...options
 		});
-		this.direction = -1;
-		this.boostLevel = EnemyShip.STARTING_VARS.BOOST_LEVEL;
+		// this.boostLevel = EnemyShip.STARTING_VARS.BOOST_LEVEL;
 		this.topSpeed = EnemyShip.STARTING_VARS.TOP_SPEED;
 		this.weaponLockout = EnemyShip.STARTING_VARS.WEAPON_LOCKOUT;
 		this.fireRate = EnemyShip.STARTING_VARS.FIRE_RATE;
@@ -247,11 +247,12 @@ EnemyShip.SPRITE_WIDTH = 16;
 EnemyShip.SPRITE_HEIGHT = 16;
 EnemyShip.WIDTH = EnemyShip.SPRITE_WIDTH * EnemyShip.SCALE;
 EnemyShip.HEIGHT = EnemyShip.SPRITE_HEIGHT * EnemyShip.SCALE;
+EnemyShip.DIRECTION = -1;
 EnemyShip.STARTING_VARS = {
 	DECELERATION: 1,
 	WEAPON_LOCKOUT: 300,
 	TOP_SPEED: 6,
-	BOOST_LEVEL: 1,
+	// BOOST_LEVEL: 1,
 	VEL: [-1, 0],
 	FIRE_RATE: 100
 };
@@ -294,6 +295,10 @@ class Game {
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyPress = this.handleKeyPress.bind(this);
 		this.spawnEnemy = this.spawnEnemy.bind(this);
+		this.checkCollisions = this.checkCollisions.bind(this);
+		this.remove = this.remove.bind(this);
+		this.add = this.add.bind(this);
+		this.allObjects = this.allObjects.bind(this);
 
 		this.gameCanvas.focus();
 
@@ -326,6 +331,10 @@ class Game {
 		if (e.code === 'Space') this.player.fire();
 	}
 
+	allObjects() {
+		return [].concat(this.player, ...this.bullets, ...this.enemies);
+	}
+
 	add(obj) {
 		if (obj instanceof Bullet) {
 			this.bullets.push(obj);
@@ -334,10 +343,21 @@ class Game {
 		}
 	}
 
+	remove(obj) {
+		if (obj instanceof Bullet) {
+			this.bullets = this.bullets.filter(bullet => bullet != obj);
+		} else if (obj instanceof EnemyShip) {
+			this.enemies = this.enemies.filter(enemy => enemy != obj);
+		} else if (obj instanceof Player) {
+			alert('You dead');
+		}
+	}
+
 	step() {
 		requestAnimationFrame(this.step);
 		this.ctx.clearRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
 		this.allObjects().forEach(obj => obj.move());
+		this.checkCollisions();
 		this.background.draw();
 		this.midground.draw();
 		this.allObjects().forEach(obj => obj.draw(this.ctx));
@@ -355,16 +375,15 @@ class Game {
 		this.add(enemy);
 	}
 
-	allObjects() {
-		return [].concat(this.player, ...this.bullets, ...this.enemies);
-	}
-
-	remove(obj) {
-		if (obj instanceof Bullet) {
-			this.bullets = this.bullets.filter(bullet => bullet != obj);
-		} else if (obj instanceof EnemyShip) {
-			this.enemies = this.enemies.filter(enemy => enemy != obj);
-		}
+	checkCollisions() {
+		this.allObjects().forEach(obj1 => {
+			this.allObjects().forEach(obj2 => {
+				if (obj1 != obj2 && obj1.isCollidedWith(obj2) && obj1.direction != obj2.direction) {
+					obj1.remove();
+					obj2.remove();
+				}
+			});
+		});
 	}
 }
 
@@ -394,9 +413,11 @@ class MovingObject {
 		game,
 		speedMultiplier = 1,
 		spriteMaxX = 1,
-		spriteMaxY = 1
+		spriteMaxY = 1,
+		direction
 	}) {
 		this.deceleration = deceleration;
+		this.direction = direction;
 		this.pos = pos;
 		this.vel = vel;
 		this.spriteWidth = spriteWidth;
@@ -409,14 +430,6 @@ class MovingObject {
 		this.width = this.spriteWidth * this.scale;
 		this.height = this.spriteHeight * this.scale;
 		this.game = game;
-		this.xBounds = [this.pos[0], this.pos[0] + this.width];
-		this.yBounds = [this.pos[1], this.pos[1] + this.height];
-		this.cornerCoords = [
-			this.pos,
-			[this.xBounds[1], this.yBounds[0]],
-			[this.xBounds[0], this.yBounds[1]],
-			[this.xBounds[1], this.yBounds[1]]
-		];
 	}
 
 	draw(ctx) {
@@ -452,8 +465,21 @@ class MovingObject {
 		if (this.pos[0] < -1 * this.width || this.pos[0] > this.game.gameCanvas.width) this.remove();
 	}
 
+	xBounds() {
+		return [this.pos[0], this.pos[0] + this.width];
+	}
+
+	yBounds() {
+		return [this.pos[1], this.pos[1] + this.height];
+	}
+
 	isCollidedWith(otherObject) {
-		return Util.between(this.cornerCoords, otherObject.xBounds, otherObject.yBounds);
+		return !(
+			this.xBounds()[0] > otherObject.xBounds()[1] ||
+			this.xBounds()[1] < otherObject.xBounds()[0] ||
+			this.yBounds()[0] > otherObject.yBounds()[1] ||
+			this.yBounds()[1] < otherObject.yBounds()[0]
+		);
 	}
 
 	collideWith(otherObject) {}
@@ -489,6 +515,7 @@ class Player extends Ship {
 			pos: Player.STARTING_VARS.POS,
 			vel: Player.STARTING_VARS.VEL,
 			deceleration: Player.STARTING_VARS.DECELERATION,
+			direction: Player.DIRECTION,
 			...options
 		});
 		this.direction = 1;
@@ -547,6 +574,7 @@ Player.SPRITE_MAX_Y = 7;
 Player.SCALE = 2;
 Player.SPRITE_WIDTH = 24;
 Player.SPRITE_HEIGHT = 16;
+Player.DIRECTION = 1;
 Player.STARTING_VARS = {
 	DECELERATION: 0.99,
 	WEAPON_LOCKOUT: 300,
@@ -578,10 +606,10 @@ class Ship extends MovingObject {
 
 	fire() {
 		const pos = this.pos.slice();
-		pos[0] += this.width + 20 * this.direction + Math.min(0, this.direction * Bullet.WIDTH);
+		pos[0] = this.direction > 0 ? pos[0] + this.width + 1 : pos[0] - Bullet.WIDTH - 1;
 		pos[1] += (this.height - Bullet.HEIGHT) / 2;
 		const vel = [Math.max(this.vel.slice()[0], 0) + 4 * this.direction, 0];
-		const bullet = new Bullet({ pos, vel, game: this.game });
+		const bullet = new Bullet({ pos, vel, game: this.game, direction: this.direction });
 
 		this.game.add(bullet);
 	}
@@ -600,27 +628,6 @@ module.exports = Ship;
 /***/ (function(module, exports) {
 
 const Util = {
-	between: (cornerCoords, xBounds, yBounds) => {
-		return (
-			(cornerCoords[0][0] >= xBounds[0] &&
-				cornerCoords[0][0] <= xBounds[1] &&
-				cornerCoords[0][1] >= yBounds[0] &&
-				cornerCoords[0][1] <= yBounds[1]) ||
-			(cornerCoords[1][0] >= xBounds[0] &&
-				cornerCoords[1][0] <= xBounds[1] &&
-				cornerCoords[1][1] >= yBounds[0] &&
-				cornerCoords[1][1] <= yBounds[1]) ||
-			(cornerCoords[2][0] >= xBounds[0] &&
-				cornerCoords[2][0] <= xBounds[1] &&
-				cornerCoords[2][1] >= yBounds[0] &&
-				cornerCoords[2][1] <= yBounds[1]) ||
-			(cornerCoords[3][0] >= xBounds[0] &&
-				cornerCoords[3][0] <= xBounds[1] &&
-				cornerCoords[3][1] >= yBounds[0] &&
-				cornerCoords[3][1] <= yBounds[1])
-		);
-	},
-
 	throttle: (func, limit) => {
 		let throttled;
 		return (...args) => {
