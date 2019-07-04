@@ -226,6 +226,7 @@ class EnemyShip extends Ship {
 		});
 		this.topSpeed = EnemyShip.STARTING_VARS.TOP_SPEED;
 		this.fireRate = EnemyShip.STARTING_VARS.FIRE_RATE;
+		this.bulletScale = EnemyShip.STARTING_VARS.BULLET_SCALE;
 
 		this.draw = this.draw.bind(this);
 	}
@@ -249,7 +250,8 @@ EnemyShip.STARTING_VARS = {
 	DECELERATION: 1,
 	TOP_SPEED: 6,
 	VEL: [-1, 0],
-	FIRE_RATE: 100
+	FIRE_RATE: 100,
+	BULLET_SCALE: 1
 };
 
 module.exports = EnemyShip;
@@ -505,6 +507,7 @@ class Player extends Ship {
 		this.boostLevel = Player.STARTING_VARS.BOOST_LEVEL;
 		this.topSpeed = Player.STARTING_VARS.TOP_SPEED;
 		this.weaponLockout = Player.STARTING_VARS.WEAPON_LOCKOUT;
+		this.bulletScale = Player.STARTING_VARS.BULLET_SCALE;
 	}
 
 	boost(direction) {
@@ -561,6 +564,7 @@ Player.DIRECTION = 1;
 Player.STARTING_VARS = {
 	DECELERATION: 0.99,
 	WEAPON_LOCKOUT: 300,
+	BULLET_SCALE: 1,
 	TOP_SPEED: 6,
 	BOOST_LEVEL: 1,
 	POS: [10, 180],
@@ -585,7 +589,6 @@ const Bullet = __webpack_require__(/*! ./bullet */ "./lib/bullet.js");
 class Ship extends MovingObject {
 	constructor(options) {
 		super(options);
-		this.bulletScale = 1;
 	}
 
 	fire() {
