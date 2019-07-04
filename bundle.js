@@ -232,7 +232,7 @@ class EnemyShip extends Ship {
 
 	draw(ctx) {
 		super.draw(ctx);
-		if (this.game.frameIndex % this.fireRate === 0) this.fire();
+		if (this.framesDrawn % this.fireRate === 0) this.fire();
 	}
 }
 
@@ -257,6 +257,51 @@ module.exports = EnemyShip;
 
 /***/ }),
 
+/***/ "./lib/explosion.js":
+/*!**************************!*\
+  !*** ./lib/explosion.js ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const StaticObject = __webpack_require__(/*! ./static_object */ "./lib/static_object.js");
+
+class Explosion extends StaticObject {
+	constructor(options) {
+		super({
+			path: Explosion.PATH,
+			scale: Explosion.SCALE,
+			spriteWidth: Explosion.SPRITE_WIDTH,
+			spriteHeight: Explosion.SPRITE_HEIGHT,
+			spriteMaxX: Explosion.SPRITE_MAX_X,
+			spriteMaxY: Explosion.SPRITE_MAX_Y,
+			...options
+		});
+
+		this.draw = this.draw.bind(this);
+	}
+
+	draw(ctx) {
+		super.draw(ctx);
+		if (this.framesDrawn > Explosion.DURATION) this.remove();
+	}
+}
+
+Explosion.PATH = './assets/images/sprites/explosion.png';
+Explosion.SPRITE_MAX_X = 5;
+Explosion.SPRITE_MAX_Y = 1;
+Explosion.SCALE = 2;
+Explosion.SPRITE_WIDTH = 16;
+Explosion.SPRITE_HEIGHT = 16;
+Explosion.WIDTH = Explosion.SPRITE_WIDTH * Explosion.SCALE;
+Explosion.HEIGHT = Explosion.SPRITE_HEIGHT * Explosion.SCALE;
+Explosion.DURATION = 200;
+
+module.exports = Explosion;
+
+
+/***/ }),
+
 /***/ "./lib/game.js":
 /*!*********************!*\
   !*** ./lib/game.js ***!
@@ -269,6 +314,7 @@ const Ship = __webpack_require__(/*! ./ship */ "./lib/ship.js");
 const Bullet = __webpack_require__(/*! ./bullet */ "./lib/bullet.js");
 const Player = __webpack_require__(/*! ./player */ "./lib/player.js");
 const EnemyShip = __webpack_require__(/*! ./enemy_ship */ "./lib/enemy_ship.js");
+const Explosion = __webpack_require__(/*! ./explosion */ "./lib/explosion.js");
 const Util = __webpack_require__(/*! ./util */ "./lib/util.js");
 
 class Game {
@@ -282,6 +328,7 @@ class Game {
 
 		this.enemies = [];
 		this.bullets = [];
+		this.explosions = [];
 
 		this.generateBackground(backgroundCtx, midgroundCtx);
 		this.player = new Player({ game: this });
@@ -327,6 +374,10 @@ class Game {
 	}
 
 	allObjects() {
+		return [].concat(this.player, ...this.bullets, ...this.enemies, ...this.explosions);
+	}
+
+	allMovingObjects() {
 		return [].concat(this.player, ...this.bullets, ...this.enemies);
 	}
 
@@ -335,6 +386,8 @@ class Game {
 			this.bullets.push(obj);
 		} else if (obj instanceof EnemyShip) {
 			this.enemies.push(obj);
+		} else if (obj instanceof Explosion) {
+			this.explosions.push(obj);
 		}
 	}
 
@@ -343,6 +396,9 @@ class Game {
 			this.bullets = this.bullets.filter(bullet => bullet != obj);
 		} else if (obj instanceof EnemyShip) {
 			this.enemies = this.enemies.filter(enemy => enemy != obj);
+			this.add(new Explosion({ pos: obj.pos, game: this }));
+		} else if (obj instanceof Explosion) {
+			this.explosions = this.explosions.filter(explosion => explosion != obj);
 		} else if (obj instanceof Player) {
 			alert('You dead');
 		}
@@ -351,7 +407,7 @@ class Game {
 	step() {
 		requestAnimationFrame(this.step);
 		this.ctx.clearRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
-		this.allObjects().forEach(obj => obj.move());
+		this.allMovingObjects().forEach(obj => obj.move());
 		this.checkCollisions();
 		this.background.draw();
 		this.midground.draw();
@@ -373,7 +429,7 @@ class Game {
 	checkCollisions() {
 		this.allObjects().forEach(obj1 => {
 			this.allObjects().forEach(obj2 => {
-				if (obj1 != obj2 && obj1.isCollidedWith(obj2) && obj1.direction != obj2.direction) {
+				if (obj1 != obj2 && obj1.isCollidedWith(obj2) && obj1.direction === -1 * obj2.direction) {
 					obj1.remove();
 					obj2.remove();
 				}
