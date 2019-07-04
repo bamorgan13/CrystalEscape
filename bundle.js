@@ -364,7 +364,7 @@ class Game {
 
 		if (this.frameIndex % this.minSpawnRateFrames === 0 && Math.random() < this.spawnChance) {
 			this.spawnEnemy();
-			this.frameIndex = 1;
+			// this.frameIndex = 1;
 		}
 		this.frameIndex++;
 	}
@@ -602,14 +602,15 @@ const Bullet = __webpack_require__(/*! ./bullet */ "./lib/bullet.js");
 class Ship extends MovingObject {
 	constructor(options) {
 		super(options);
+		this.bulletScale = 1;
 	}
 
 	fire() {
 		const pos = this.pos.slice();
-		pos[0] = this.direction > 0 ? pos[0] + this.width + 1 : pos[0] - Bullet.WIDTH - 1;
-		pos[1] += (this.height - Bullet.HEIGHT) / 2;
+		pos[0] = this.direction > 0 ? pos[0] + this.width + 1 : pos[0] - Bullet.SPRITE_WIDTH * this.bulletScale - 1;
+		pos[1] += (this.height - Bullet.SPRITE_HEIGHT * this.bulletScale) / 2;
 		const vel = [Math.max(this.vel.slice()[0], 0) + 4 * this.direction, 0];
-		const bullet = new Bullet({ pos, vel, game: this.game, direction: this.direction });
+		const bullet = new Bullet({ pos, vel, game: this.game, scale: this.bulletScale, direction: this.direction });
 
 		this.game.add(bullet);
 	}
