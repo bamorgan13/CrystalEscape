@@ -97,10 +97,10 @@ class Background {
 	constructor({ ctx, type, level = 1 }) {
 		this.ctx = ctx;
 		if (type === 'background') {
-			this.path = `./assets/images/backgrounds/level_${Math.max(level % 6, 1)}/background.png`;
+			this.path = `./assets/images/backgrounds/level_${level % 5}/background.png`;
 			this.scrollSpeed = 1 + level * 0.1;
 		} else {
-			this.path = `./assets/images/backgrounds/level_${Math.max(level % 6, 1)}/midground.png`;
+			this.path = `./assets/images/backgrounds/level_${level % 5}/midground.png`;
 			this.scrollSpeed = 2 + level * 0.2;
 		}
 		this.x = 0;
@@ -308,8 +308,9 @@ class Game {
 		this.backgroundCtx = backgroundCtx;
 
 		this.frameIndex = 1;
+		this.spawnRateFrames = 200;
 		this.minSpawnRateFrames = 50;
-		this.spawnChance = 0.2;
+		this.spawnChance = 0.3;
 
 		this.enemies = [];
 		this.bullets = [];
@@ -330,6 +331,7 @@ class Game {
 		this.allObjects = this.allObjects.bind(this);
 		this.generateBackground = this.generateBackground.bind(this);
 		this.reset = this.reset.bind(this);
+		this.levelUp = this.levelUp.bind(this);
 
 		this.gameCanvas.focus();
 
@@ -404,18 +406,12 @@ class Game {
 		this.score.draw(this.ctx);
 		this.allObjects().forEach(obj => obj.draw(this.ctx));
 
-		if (this.frameIndex % this.minSpawnRateFrames === 0 && Math.random() < this.spawnChance) {
+		if (this.frameIndex % this.spawnRateFrames === 0 && Math.random() < this.spawnChance) {
 			this.spawnEnemy();
 		}
-		// if (this.score.currentScore > 5000) {
-		// 	alert(`You win! Score: ${this.score.currentScore}`);
-		// 	this.reset();
-		// }
-		if (this.score.currentScore / 1000 >= this.level) {
-			this.level++;
-			this.generateBackground();
-		}
-		if (this.frameIndex === 10000) this.frameIndex = 0;
+
+		if (this.score.currentScore / 1000 >= this.level) this.levelUp(); //Testing - automatic levelup after 1000 points
+
 		this.frameIndex++;
 	}
 
@@ -432,6 +428,7 @@ class Game {
 			const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - LargeEnemy.HEIGHT + 1))];
 			enemy = new LargeEnemy({ game: this, pos });
 		}
+		console.log('Spawning', enemy);
 		this.add(enemy);
 	}
 
@@ -448,13 +445,22 @@ class Game {
 		});
 	}
 
-	// Clear enemies, bullets, and explosions. Reset score to 0 and level to 1. Generate level 1 backgrounds.
+	// Clear enemies, bullets, and explosions. Reset score to 0 and level and multiplier to 1. Generate level 1 backgrounds.
 	reset() {
 		this.enemies = [];
 		this.bullets = [];
 		this.explosions = [];
 		this.score.currentScore = 0;
+		this.score.multiplier = 1;
 		this.level = 1;
+		this.generateBackground();
+	}
+
+	levelUp() {
+		this.level++;
+		this.score.multiplier += 0.5;
+		this.spawnChance = Math.min(this.spawnChance * 1.1, 1);
+		this.spawnRateFrames = Math.max(Math.floor(this.spawnRateFrames * 0.9), this.minSpawnRateFrames);
 		this.generateBackground();
 	}
 }
@@ -730,6 +736,7 @@ class Score {
 
 		this.framesDrawn++;
 		if (this.framesDrawn % 10 === 0) this.currentScore += this.multiplier;
+		this.currentScore = Math.floor(this.currentScore);
 	}
 
 	addPoints(basePoints) {
