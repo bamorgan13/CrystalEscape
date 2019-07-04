@@ -273,7 +273,7 @@ Explosion.SPRITE_WIDTH = 16;
 Explosion.SPRITE_HEIGHT = 16;
 Explosion.WIDTH = Explosion.SPRITE_WIDTH * Explosion.SCALE;
 Explosion.HEIGHT = Explosion.SPRITE_HEIGHT * Explosion.SCALE;
-Explosion.DURATION = 200;
+Explosion.DURATION = 100;
 
 module.exports = Explosion;
 
@@ -296,6 +296,7 @@ const SmallEnemy = __webpack_require__(/*! ./small_enemy */ "./lib/small_enemy.j
 const MediumEnemy = __webpack_require__(/*! ./medium_enemy */ "./lib/medium_enemy.js");
 const LargeEnemy = __webpack_require__(/*! ./large_enemy */ "./lib/large_enemy.js");
 const Explosion = __webpack_require__(/*! ./explosion */ "./lib/explosion.js");
+const Powerup = __webpack_require__(/*! ./powerup */ "./lib/powerup.js");
 const Score = __webpack_require__(/*! ./score */ "./lib/score.js");
 const Util = __webpack_require__(/*! ./util */ "./lib/util.js");
 
@@ -315,6 +316,7 @@ class Game {
 		this.enemies = [];
 		this.bullets = [];
 		this.explosions = [];
+		this.powerups = [];
 
 		this.generateBackground();
 		this.player = new Player({ game: this });
@@ -364,7 +366,7 @@ class Game {
 	}
 
 	allObjects() {
-		return [].concat(this.player, ...this.bullets, ...this.enemies, ...this.explosions);
+		return [].concat(this.player, ...this.bullets, ...this.enemies, ...this.explosions, ...this.powerups);
 	}
 
 	allMovingObjects() {
@@ -378,6 +380,8 @@ class Game {
 			this.enemies.push(obj);
 		} else if (obj instanceof Explosion) {
 			this.explosions.push(obj);
+		} else if (obj instanceof Powerup) {
+			this.powerups.push(obj);
 		}
 	}
 
@@ -390,6 +394,9 @@ class Game {
 			this.add(new Explosion({ pos: obj.pos, game: this }));
 		} else if (obj instanceof Explosion) {
 			this.explosions = this.explosions.filter(explosion => explosion != obj);
+			if (Math.random() < 1) this.add(new Powerup({ pos: obj.pos, game: this, index: Math.floor(Math.random() * 4) }));
+		} else if (obj instanceof Powerup) {
+			this.powerups = this.powerups.filter(powerup => powerup != obj);
 		} else if (obj instanceof Player) {
 			alert(`You died :( Score: ${this.score.currentScore}`);
 			this.reset();
@@ -440,6 +447,9 @@ class Game {
 					if (obj1.isCollidedWith(obj2) && obj1.direction === -1 * obj2.direction) {
 						obj1.remove();
 						obj2.remove();
+					} else if (obj1.isCollidedWith(obj2) && obj1 instanceof Player && obj2 instanceof Powerup) {
+						console.log(obj1, obj2);
+						obj2.remove();
 					}
 				});
 		});
@@ -450,8 +460,11 @@ class Game {
 		this.enemies = [];
 		this.bullets = [];
 		this.explosions = [];
+		this.powerups = [];
 		this.score.currentScore = 0;
 		this.score.multiplier = 1;
+		this.spawnChance = 0.3;
+		this.spawnRateFrames = 200;
 		this.level = 1;
 		this.generateBackground();
 	}
@@ -705,6 +718,52 @@ module.exports = Player;
 
 /***/ }),
 
+/***/ "./lib/powerup.js":
+/*!************************!*\
+  !*** ./lib/powerup.js ***!
+  \************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const StaticObject = __webpack_require__(/*! ./static_object */ "./lib/static_object.js");
+
+class Powerup extends StaticObject {
+	constructor(options) {
+		super({
+			path: Powerup.PATH,
+			scale: Powerup.SCALE,
+			spriteWidth: Powerup.SPRITE_WIDTH,
+			spriteHeight: Powerup.SPRITE_HEIGHT,
+			spriteMaxX: Powerup.SPRITE_MAX_X,
+			spriteMaxY: Powerup.SPRITE_MAX_Y,
+			spriteYOffset: Powerup.SPRITE_HEIGHT * options.index,
+			...options
+		});
+
+		this.draw = this.draw.bind(this);
+	}
+
+	draw(ctx) {
+		super.draw(ctx);
+		if (this.framesDrawn > Powerup.DURATION) this.remove();
+	}
+}
+
+Powerup.PATH = './assets/images/sprites/power-up.png';
+Powerup.SPRITE_MAX_X = 2;
+Powerup.SPRITE_MAX_Y = 1;
+Powerup.SCALE = 1;
+Powerup.SPRITE_WIDTH = 16;
+Powerup.SPRITE_HEIGHT = 16;
+Powerup.WIDTH = Powerup.SPRITE_WIDTH * Powerup.SCALE;
+Powerup.HEIGHT = Powerup.SPRITE_HEIGHT * Powerup.SCALE;
+Powerup.DURATION = 600;
+
+module.exports = Powerup;
+
+
+/***/ }),
+
 /***/ "./lib/score.js":
 /*!**********************!*\
   !*** ./lib/score.js ***!
@@ -839,8 +898,21 @@ module.exports = SmallEnemy;
 /***/ (function(module, exports) {
 
 class StaticObject {
-	constructor({ pos, path, scale = 1, spriteWidth, spriteHeight, game, spriteMaxX = 1, spriteMaxY = 1 }) {
+	constructor({
+		pos,
+		path,
+		scale = 1,
+		spriteXOffset = 0,
+		spriteYOffset = 0,
+		spriteWidth,
+		spriteHeight,
+		game,
+		spriteMaxX = 1,
+		spriteMaxY = 1
+	}) {
 		this.pos = pos;
+		this.spriteXOffset = spriteXOffset;
+		this.spriteYOffset = spriteYOffset;
 		this.spriteWidth = spriteWidth;
 		this.spriteHeight = spriteHeight;
 		this.img = new Image();
@@ -857,8 +929,8 @@ class StaticObject {
 		if (this.img.naturalWidth > 0) {
 			ctx.drawImage(
 				this.img,
-				0 + this.spriteIndex.x * this.spriteWidth,
-				0 + this.spriteIndex.y * this.spriteHeight,
+				this.spriteXOffset + this.spriteIndex.x * this.spriteWidth,
+				this.spriteYOffset + this.spriteIndex.y * this.spriteHeight,
 				this.spriteWidth,
 				this.spriteHeight,
 				this.pos[0],
