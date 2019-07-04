@@ -219,15 +219,12 @@ class EnemyShip extends Ship {
 			spriteHeight: EnemyShip.SPRITE_HEIGHT,
 			spriteMaxX: EnemyShip.SPRITE_MAX_X,
 			spriteMaxY: EnemyShip.SPRITE_MAX_Y,
-			// pos: EnemyShip.STARTING_VARS.POS,
 			vel: EnemyShip.STARTING_VARS.VEL,
 			deceleration: EnemyShip.STARTING_VARS.DECELERATION,
 			direction: EnemyShip.DIRECTION,
 			...options
 		});
-		// this.boostLevel = EnemyShip.STARTING_VARS.BOOST_LEVEL;
 		this.topSpeed = EnemyShip.STARTING_VARS.TOP_SPEED;
-		this.weaponLockout = EnemyShip.STARTING_VARS.WEAPON_LOCKOUT;
 		this.fireRate = EnemyShip.STARTING_VARS.FIRE_RATE;
 
 		this.draw = this.draw.bind(this);
@@ -250,9 +247,7 @@ EnemyShip.HEIGHT = EnemyShip.SPRITE_HEIGHT * EnemyShip.SCALE;
 EnemyShip.DIRECTION = -1;
 EnemyShip.STARTING_VARS = {
 	DECELERATION: 1,
-	WEAPON_LOCKOUT: 300,
 	TOP_SPEED: 6,
-	// BOOST_LEVEL: 1,
 	VEL: [-1, 0],
 	FIRE_RATE: 100
 };
@@ -364,8 +359,8 @@ class Game {
 
 		if (this.frameIndex % this.minSpawnRateFrames === 0 && Math.random() < this.spawnChance) {
 			this.spawnEnemy();
-			// this.frameIndex = 1;
 		}
+		if (this.frameIndex === 10000) this.frameIndex = 0;
 		this.frameIndex++;
 	}
 
