@@ -641,8 +641,11 @@ class Player extends Ship {
 		this.weaponLockout = Player.STARTING_VARS.WEAPON_LOCKOUT;
 		this.bulletScale = Player.STARTING_VARS.BULLET_SCALE;
 		this.bulletSpeed = Player.STARTING_VARS.BULLET_SPEED;
+		this.powerupTimer = -1;
+		this.activePowerups = [];
 
 		this.addPowerup = this.addPowerup.bind(this);
+		this.removePowerups = this.removePowerups.bind(this);
 	}
 
 	boost(direction) {
@@ -685,27 +688,57 @@ class Player extends Ship {
 			this.vel[1] = 0;
 			this.pos[1] = this.game.gameCanvas.height - this.height - 1;
 		}
+
 		super.move();
 	}
 
+	draw(ctx) {
+		// Countdown powerup timer and remove if necessary
+		if (this.powerupTimer >= 0) this.powerupTimer--;
+		if (this.powerupTimer === 0) this.removePowerups();
+
+		// Display current powerups
+		ctx.font = '14px Arial';
+		ctx.fillStyle = 'white';
+		ctx.fillText('Active Powerups:', 650, 20);
+		this.activePowerups.forEach((powerup, i) => {
+			ctx.fillText(powerup.type, 650, 20 * (i + 2));
+		});
+
+		super.draw(ctx);
+	}
+
 	addPowerup(powerup) {
+		this.activePowerups.push(powerup);
+		this.powerupTimer = Player.POWERUP_DURATION;
 		switch (powerup.type) {
-			case 'increaseBulletSize':
-				this.bulletScale *= 1.5;
+			case 'Bigger Bullets!':
+				this.bulletScale *= 2;
 				break;
-			case 'increaseBulletSpeed':
-				this.bulletSpeed *= 1.5;
+			case 'Faster Bullets!':
+				this.bulletSpeed *= 2;
 				break;
-			case 'increaseBoost':
-				this.boostLevel *= 1.5;
+			case 'So Agile!':
+				this.boostLevel *= 2;
 				break;
-			case 'fasterReload':
-				this.weaponLockout /= 1.5;
+			case 'Reload Faster!':
+				this.weaponLockout *= 0.5;
 				this.game.gameCanvas.removeEventListener('keypress', this.game.throttledPress);
 				this.game.throttledPress = Util.throttle(this.game.handleKeyPress, this.weaponLockout);
 				this.game.gameCanvas.addEventListener('keypress', this.game.throttledPress);
 				break;
 		}
+	}
+
+	removePowerups() {
+		this.activePowerups = [];
+		this.bulletScale = Player.STARTING_VARS.BULLET_SCALE;
+		this.bulletSpeed = Player.STARTING_VARS.BULLET_SPEED;
+		this.boostLevel = Player.STARTING_VARS.BOOST_LEVEL;
+		this.weaponLockout = Player.STARTING_VARS.WEAPON_LOCKOUT;
+		this.game.gameCanvas.removeEventListener('keypress', this.game.throttledPress);
+		this.game.throttledPress = Util.throttle(this.game.handleKeyPress, this.weaponLockout);
+		this.game.gameCanvas.addEventListener('keypress', this.game.throttledPress);
 	}
 }
 
@@ -716,6 +749,7 @@ Player.SCALE = 2;
 Player.SPRITE_WIDTH = 24;
 Player.SPRITE_HEIGHT = 16;
 Player.DIRECTION = 1;
+Player.POWERUP_DURATION = 600;
 Player.STARTING_VARS = {
 	DECELERATION: 0.99,
 	WEAPON_LOCKOUT: 300,
@@ -756,16 +790,16 @@ class Powerup extends StaticObject {
 
 		switch (options.index) {
 			case 0:
-				this.type = 'increaseBulletSize';
+				this.type = 'Bigger Bullets!';
 				break;
 			case 1:
-				this.type = 'increaseBulletSpeed';
+				this.type = 'Faster Bullets!';
 				break;
 			case 2:
-				this.type = 'increaseBoost';
+				this.type = 'So Agile!';
 				break;
 			case 3:
-				this.type = 'fasterReload';
+				this.type = 'Reload Faster!';
 				break;
 		}
 
@@ -809,18 +843,12 @@ class Score {
 	}
 
 	draw(ctx) {
-		ctx.font = '20px Arial';
+		ctx.font = '18px Arial';
 		ctx.fillStyle = 'white';
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = 'black';
 		ctx.fillText('SCORE:', 10, 20);
-		ctx.strokeText('SCORE:', 10, 20);
 		ctx.fillText(this.currentScore, 90, 20);
-		ctx.strokeText(this.currentScore, 90, 20);
 		ctx.fillText('LEVEL:', 10, 50);
-		ctx.strokeText('LEVEL:', 10, 50);
 		ctx.fillText(this.game.level, 80, 50);
-		ctx.strokeText(this.game.level, 80, 50);
 
 		this.framesDrawn++;
 		if (this.framesDrawn % 10 === 0) this.currentScore += this.multiplier;
