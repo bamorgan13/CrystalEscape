@@ -191,7 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	const gameCanvas = document.getElementById('game-canvas');
 	const gameCtx = gameCanvas.getContext('2d');
 
-	const game = new Game({ gameCanvas, gameCtx, midgroundCtx, backgroundCtx });
+	const HUDCanvas = document.getElementById('hud-frame-canvas');
+	const HUDCtx = HUDCanvas.getContext('2d');
+
+	const game = new Game({ gameCanvas, gameCtx, midgroundCtx, backgroundCtx, HUDCtx });
 	game.step();
 });
 
@@ -298,12 +301,14 @@ const Score = __webpack_require__(/*! ./score */ "./lib/score.js");
 const Util = __webpack_require__(/*! ./util */ "./lib/util.js");
 
 class Game {
-	constructor({ gameCanvas, gameCtx, midgroundCtx, backgroundCtx }) {
+	constructor({ gameCanvas, gameCtx, midgroundCtx, backgroundCtx, HUDCtx }) {
 		this.gameCanvas = gameCanvas;
 		this.ctx = gameCtx;
 
 		this.midgroundCtx = midgroundCtx;
 		this.backgroundCtx = backgroundCtx;
+
+		this.HUDCtx = HUDCtx;
 
 		this.frameIndex = 1;
 		this.spawnRateFrames = 200;
@@ -392,12 +397,13 @@ class Game {
 
 	step() {
 		requestAnimationFrame(this.step);
+		this.HUDCtx.clearRect(0, 0, this.HUDCtx.canvas.width, this.HUDCtx.canvas.height);
 		this.ctx.clearRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
 		this.allMovingObjects().forEach(obj => obj.move());
 		this.checkCollisions();
 		this.background.draw();
 		this.midground.draw();
-		this.score.draw(this.ctx);
+		this.score.draw(this.HUDCtx);
 		this.allObjects().forEach(obj => obj.draw(this.ctx));
 
 		if (this.frameIndex % this.spawnRateFrames === 0 && Math.random() < this.spawnChance) {
@@ -696,11 +702,14 @@ class Player extends Ship {
 		if (this.powerupTimer === 0) this.removePowerups();
 
 		// Display current powerups
-		ctx.font = '14px Arial';
-		ctx.fillStyle = 'white';
-		ctx.fillText('Active Powerups:', 650, 20);
+		this.game.HUDCtx.font = '14px Arial';
+		this.game.HUDCtx.fillStyle = 'red';
+
+		this.game.HUDCtx.fillText('Powerup Timer:', 1050, 180);
+		if (this.activePowerups.length > 0) this.game.HUDCtx.fillText(this.powerupTimer / 100, 1050, 200);
+		this.game.HUDCtx.fillText('Active Powerups:', 1050, 250);
 		this.activePowerups.forEach((powerup, i) => {
-			ctx.fillText(powerup.type, 650, 20 * (i + 2));
+			this.game.HUDCtx.fillText(powerup.type, 1050, 20 * (i + 14));
 		});
 
 		super.draw(ctx);
@@ -842,11 +851,11 @@ class Score {
 
 	draw(ctx) {
 		ctx.font = '18px Arial';
-		ctx.fillStyle = 'white';
-		ctx.fillText('SCORE:', 10, 20);
-		ctx.fillText(this.currentScore, 90, 20);
-		ctx.fillText('LEVEL:', 10, 50);
-		ctx.fillText(this.game.level, 80, 50);
+		ctx.fillStyle = 'red';
+		ctx.fillText('SCORE:', 20, 200);
+		ctx.fillText(this.currentScore, 100, 200);
+		ctx.fillText('LEVEL:', 20, 230);
+		ctx.fillText(this.game.level, 90, 230);
 
 		this.framesDrawn++;
 		if (this.framesDrawn % 10 === 0) this.currentScore += this.multiplier;
