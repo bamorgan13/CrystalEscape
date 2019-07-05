@@ -29,7 +29,7 @@ Grabbing the crystal in each level moves the player on to the next zone, where t
 - [x] Collision with enemies triggers ship destruction
 - [x] Weapon collision with enemies triggers enemy destruction
 - [x] Powerups affect game variables (increased speed, bullet size, etc.)
-- [ ] Collecting crystal triggers new phase with altered variables
+- [x] Collecting crystal triggers new phase with altered variables
 - [x] Score is increased continually as player progresses through level. Bonus points awarded for destroying enemies
 
 ### Implementation Timeline
@@ -55,8 +55,8 @@ Grabbing the crystal in each level moves the player on to the next zone, where t
 - [x] Powerups alter game variables
 
 ##### Day 5:
-- [ ] Crystal spawns after score threshold is met
-- [ ] Collecting crystal triggers next phase with increased game variables
+- [x] Crystal spawns after score threshold is met
+- [x] Collecting crystal triggers next phase with increased game variables
 - [x] Score is continually updated and displayed for the player
 
 ##### Bonus Goals:

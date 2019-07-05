@@ -172,6 +172,71 @@ module.exports = Bullet;
 
 /***/ }),
 
+/***/ "./lib/crystal.js":
+/*!************************!*\
+  !*** ./lib/crystal.js ***!
+  \************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const MovingObject = __webpack_require__(/*! ./moving_object */ "./lib/moving_object.js");
+
+class Crystal extends MovingObject {
+	constructor(options) {
+		console.log('New Crystal');
+		super({
+			path: Crystal.PATH,
+			scale: Crystal.SCALE,
+			spriteWidth: Crystal.SPRITE_WIDTH,
+			spriteHeight: Crystal.SPRITE_HEIGHT,
+			spriteMaxX: Crystal.SPRITE_MAX_X,
+			spriteMaxY: Crystal.SPRITE_MAX_Y,
+			vel: [Math.random() * Crystal.TOP_SPEED, Math.random() * Crystal.TOP_SPEED],
+			pos: [
+				options.game.gameCanvas.width - Crystal.WIDTH * 2,
+				Math.floor(Math.random() * (options.game.gameCanvas.height - Crystal.HEIGHT + 1))
+			],
+			...options
+		});
+	}
+
+	move() {
+		//Restrict movement to window and bounce off edges
+		if (this.pos[0] < 0) {
+			this.vel[0] *= -1;
+			this.pos[0] = 1;
+		} else if (this.pos[0] > this.game.gameCanvas.width - this.width) {
+			this.vel[0] *= -1;
+			this.pos[0] = this.game.gameCanvas.width - this.width - 1;
+		}
+
+		if (this.pos[1] < 0) {
+			this.vel[1] *= -1;
+			this.pos[1] = 1;
+		} else if (this.pos[1] > this.game.gameCanvas.height - this.height) {
+			this.vel[1] *= -1;
+			this.pos[1] = this.game.gameCanvas.height - this.height - 1;
+		}
+
+		super.move();
+	}
+}
+
+Crystal.PATH = './assets/images/sprites/crystal.png';
+Crystal.SPRITE_MAX_X = 4;
+Crystal.SPRITE_MAX_Y = 1;
+Crystal.SCALE = 2;
+Crystal.SPRITE_WIDTH = 10;
+Crystal.SPRITE_HEIGHT = 24;
+Crystal.WIDTH = Crystal.SPRITE_WIDTH * Crystal.SCALE;
+Crystal.HEIGHT = Crystal.SPRITE_HEIGHT * Crystal.SCALE;
+Crystal.TOP_SPEED = 4;
+
+module.exports = Crystal;
+
+
+/***/ }),
+
 /***/ "./lib/crystal_escape.js":
 /*!*******************************!*\
   !*** ./lib/crystal_escape.js ***!
@@ -297,6 +362,7 @@ const MediumEnemy = __webpack_require__(/*! ./medium_enemy */ "./lib/medium_enem
 const LargeEnemy = __webpack_require__(/*! ./large_enemy */ "./lib/large_enemy.js");
 const Explosion = __webpack_require__(/*! ./explosion */ "./lib/explosion.js");
 const Powerup = __webpack_require__(/*! ./powerup */ "./lib/powerup.js");
+const Crystal = __webpack_require__(/*! ./crystal */ "./lib/crystal.js");
 const Score = __webpack_require__(/*! ./score */ "./lib/score.js");
 const Util = __webpack_require__(/*! ./util */ "./lib/util.js");
 
@@ -304,6 +370,7 @@ class Game {
 	constructor({ gameCanvas, gameCtx, midgroundCtx, backgroundCtx, HUDCtx }) {
 		this.gameCanvas = gameCanvas;
 		this.ctx = gameCtx;
+		this.paused = true;
 
 		this.midgroundCtx = midgroundCtx;
 		this.backgroundCtx = backgroundCtx;
@@ -314,17 +381,19 @@ class Game {
 		this.spawnRateFrames = 200;
 		this.minSpawnRateFrames = 50;
 		this.spawnChance = 0.3;
+		this.powerUpDropChance = 1;
 
 		this.enemies = [];
 		this.bullets = [];
 		this.explosions = [];
 		this.powerups = [];
-
-		this.generateBackground();
-		this.player = new Player({ game: this });
+		this.crystals = [];
 
 		this.level = 1;
 		this.score = new Score({ game: this });
+		this.player = new Player({ game: this });
+		this.generateBackground();
+
 		this.step = this.step.bind(this);
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyPress = this.handleKeyPress.bind(this);
@@ -350,6 +419,8 @@ class Game {
 			this.player.boost('left');
 		} else if (e.code === 'KeyD' || e.code === 'ArrowRight') {
 			this.player.boost('right');
+		} else if (e.code === 'Enter' || (e.code === 'Space' && this.paused)) {
+			this.paused = !this.paused;
 		}
 	}
 
@@ -358,11 +429,11 @@ class Game {
 	}
 
 	allObjects() {
-		return [].concat(this.player, ...this.bullets, ...this.enemies, ...this.explosions, ...this.powerups);
+		return this.allMovingObjects().concat(...this.explosions, ...this.powerups);
 	}
 
 	allMovingObjects() {
-		return [].concat(this.player, ...this.bullets, ...this.enemies);
+		return [].concat(this.player, ...this.bullets, ...this.enemies, ...this.crystals);
 	}
 
 	add(obj) {
@@ -374,6 +445,8 @@ class Game {
 			this.explosions.push(obj);
 		} else if (obj instanceof Powerup) {
 			this.powerups.push(obj);
+		} else if (obj instanceof Crystal) {
+			this.crystals.push(obj);
 		}
 	}
 
@@ -386,9 +459,12 @@ class Game {
 			this.add(new Explosion({ pos: obj.pos, game: this }));
 		} else if (obj instanceof Explosion) {
 			this.explosions = this.explosions.filter(explosion => explosion != obj);
-			if (Math.random() < 1) this.add(new Powerup({ pos: obj.pos, game: this, index: Math.floor(Math.random() * 4) }));
+			if (Math.random() < this.powerUpDropChance)
+				this.add(new Powerup({ pos: obj.pos, game: this, index: Math.floor(Math.random() * 4) }));
 		} else if (obj instanceof Powerup) {
 			this.powerups = this.powerups.filter(powerup => powerup != obj);
+		} else if (obj instanceof Crystal) {
+			this.crystals = [];
 		} else if (obj instanceof Player) {
 			alert(`You died :( Score: ${this.score.currentScore}`);
 			this.reset();
@@ -397,35 +473,51 @@ class Game {
 
 	step() {
 		requestAnimationFrame(this.step);
-		this.HUDCtx.clearRect(0, 0, this.HUDCtx.canvas.width, this.HUDCtx.canvas.height);
-		this.ctx.clearRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
-		this.allMovingObjects().forEach(obj => obj.move());
-		this.checkCollisions();
-		this.background.draw();
-		this.midground.draw();
-		this.score.draw(this.HUDCtx);
-		this.allObjects().forEach(obj => obj.draw(this.ctx));
+		if (!this.paused) {
+			this.HUDCtx.clearRect(0, 0, this.HUDCtx.canvas.width, this.HUDCtx.canvas.height);
+			this.ctx.clearRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
+			this.allMovingObjects().forEach(obj => obj.move());
+			this.checkCollisions();
+			this.background.draw();
+			this.midground.draw();
+			this.score.draw(this.HUDCtx);
+			this.allObjects().forEach(obj => obj.draw(this.ctx));
 
-		if (this.frameIndex % this.spawnRateFrames === 0 && Math.random() < this.spawnChance) {
-			this.spawnEnemy();
+			// Perform roll to spawn enemy after appropriate number of frames have passed
+			if (this.frameIndex % this.spawnRateFrames === 0 && Math.random() < this.spawnChance) {
+				this.spawnEnemy();
+			}
+
+			// Spawn a crystal after player attains score threshold for the current level
+			if (this.crystals.length === 0 && this.score.currentScore > Math.pow(this.level, 2) * 1000) {
+				this.add(new Crystal({ game: this }));
+			}
+
+			this.frameIndex++;
+		} else {
+			this.ctx.fillStyle = 'slategrey';
+			this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
+			this.ctx.font = '20px Arial';
+			this.ctx.fillStyle = 'white';
+			this.ctx.fillText('Game Paused', 350, 150);
+			this.ctx.fillText('Press Enter or Space to Start', 280, 200);
 		}
-
-		if (this.score.currentScore / 1000 >= this.level) this.levelUp(); //Testing - automatic levelup after 1000 points
-
-		this.frameIndex++;
 	}
 
 	spawnEnemy() {
 		let enemy;
 		const rand = Math.random();
 		if (rand < 0.5) {
-			const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - SmallEnemy.HEIGHT + 1))];
+			const pos = [this.gameCanvas.width, Math.floor(Math.random() * (this.gameCanvas.height - SmallEnemy.HEIGHT + 1))];
 			enemy = new SmallEnemy({ game: this, pos });
 		} else if (rand < 0.8) {
-			const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - MediumEnemy.HEIGHT + 1))];
+			const pos = [
+				this.gameCanvas.width,
+				Math.floor(Math.random() * (this.gameCanvas.height - MediumEnemy.HEIGHT + 1))
+			];
 			enemy = new MediumEnemy({ game: this, pos });
 		} else {
-			const pos = [800, Math.floor(Math.random() * (this.gameCanvas.height - LargeEnemy.HEIGHT + 1))];
+			const pos = [this.gameCanvas.width, Math.floor(Math.random() * (this.gameCanvas.height - LargeEnemy.HEIGHT + 1))];
 			enemy = new LargeEnemy({ game: this, pos });
 		}
 		console.log('Spawning', enemy);
@@ -441,8 +533,10 @@ class Game {
 						obj1.remove();
 						obj2.remove();
 					} else if (obj1.isCollidedWith(obj2) && obj1 instanceof Player && obj2 instanceof Powerup) {
-						console.log(obj2.type);
 						this.player.addPowerup(obj2);
+						obj2.remove();
+					} else if (obj1.isCollidedWith(obj2) && obj1 instanceof Player && obj2 instanceof Crystal) {
+						this.levelUp();
 						obj2.remove();
 					}
 				});
@@ -455,6 +549,7 @@ class Game {
 		this.bullets = [];
 		this.explosions = [];
 		this.powerups = [];
+		this.crystals = [];
 		this.score.currentScore = 0;
 		this.score.multiplier = 1;
 		this.spawnChance = 0.3;
@@ -462,6 +557,7 @@ class Game {
 		this.level = 1;
 		this.player.removePowerups();
 		this.generateBackground();
+		this.paused = true;
 	}
 
 	levelUp() {
