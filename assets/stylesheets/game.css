@@ -7,28 +7,29 @@ body,
 }
 
 body {
-	background: #115950; /* Old browsers */
-	background: -moz-linear-gradient(-45deg, #115950 0%, #146b65 27%, #1cafab 71%, #4ac4bc 100%); /* FF3.6-15 */
+	/*
+	background: #115950;
+	background: -moz-linear-gradient(-45deg, #115950 0%, #146b65 27%, #1cafab 71%, #4ac4bc 100%);
 	background: -webkit-linear-gradient(
 		-45deg,
 		#115950 0%,
 		#146b65 27%,
 		#1cafab 71%,
 		#4ac4bc 100%
-	); /* Chrome10-25,Safari5.1-6 */
+	);
 	background: linear-gradient(
 		135deg,
 		#115950 0%,
 		#146b65 27%,
 		#1cafab 71%,
 		#4ac4bc 100%
-	); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	);
 	filter: progid:DXImageTransform.Microsoft.gradient(
 			startColorstr='#115950',
 			endColorstr='#4ac4bc',
 			GradientType=1
-		); /* IE6-9 fallback on horizontal gradient */
-
+		);
+*/
 	background: black;
 	min-height: 100vh;
 }
@@ -65,4 +66,8 @@ body {
 canvas {
 	position: fixed;
 	outline: none;
+}
+
+#game-canvas {
+	border: 2px solid slategray;
 }
