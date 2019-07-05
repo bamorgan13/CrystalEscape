@@ -5,16 +5,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Crystal Escape</title>
+  <link href="https://fonts.googleapis.com/css?family=Black+Ops+One|Faster+One&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/stylesheets/reset.css" type="text/css">
   <link rel="stylesheet" href="assets/stylesheets/game.css" type="text/css">
   <script type="text/javascript" src="bundle.js"></script>
 </head>
 <body>
-  <div class="canvas-container">
-    <canvas id="hud-frame-canvas" width="1200" height="600"></canvas>
-    <canvas id="background-canvas" width="800" height="400"></canvas>
-    <canvas id="midground-canvas" width="800" height="400"></canvas>
-    <canvas tabindex="1" id="game-canvas" width="800" height="400"></canvas>
-  </div>
+  <nav>
+    <h1 class="game-title">Crystal Escape</h1>
+    <ul class="nav-links-list">
+      <li>
+        <a href="https://www.linkedin.com/in/bryce-morgan-344187177/">
+          <img class="logo" src="./assets/images/logos/linkedin.png" alt="linkedin">
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/bamorgan13">
+          <img class="logo" src="./assets/images/logos/github.png" alt="github">
+        </a>
+      </li>
+      <li>
+        <a href="mailto:bamorgan13@gmail.com">
+          <img class="logo" src="./assets/images/logos/email.png" alt="email">
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <main class="main-container">
+    <div class="sprite-group-container left">
+      <div class="sprite-container ship">
+        <img class="sprite ship" src="./assets//images/sprites/ship.png" alt="ship sprite">
+      </div>
+      <div class="sprite-container crystal">
+        <img class="sprite crystal" src="./assets//images/sprites/crystal.png" alt="crystal sprite">
+      </div>
+      <div class="sprite-container enemy-small">
+        <img class="sprite enemy-small" src="./assets//images/sprites/enemy-small.png" alt="small enemy sprite">
+      </div>
+      <div class="sprite-container enemy-large">
+        <img class="sprite enemy-large" src="./assets//images/sprites/enemy-large.png" alt="large enemy sprite">
+      </div>
+      <div class="sprite-container bullet bullet-1">
+        <img class="sprite bullet bullet-1" src="./assets//images/sprites/bullet.png" alt="bullet sprite">
+      </div>
+      <div class="sprite-container bullet bullet-2">
+        <img class="sprite bullet bullet-2" src="./assets//images/sprites/bullet.png" alt="bullet sprite">
+      </div>
+      <div class="sprite-container bullet bullet-3">
+        <img class="sprite bullet bullet-3" src="./assets//images/sprites/bullet.png" alt="bullet sprite">
+      </div>
+    </div>
+    <div class="canvas-container">
+      <div class="HUD-background-box left"></div>
+      <div class="HUD-background-box right"></div>
+      <canvas id="hud-frame-canvas" width="1200" height="600"></canvas>
+      <canvas id="background-canvas" width="800" height="400"></canvas>
+      <canvas id="midground-canvas" width="800" height="400"></canvas>
+      <canvas tabindex="1" id="game-canvas" width="800" height="400"></canvas>
+    </div>
+    <div class="sprite-group-container right">
+      <div class="sprite-container ship">
+        <img class="sprite ship" src="./assets//images/sprites/ship.png" alt="ship sprite">
+      </div>
+      <div class="sprite-container crystal">
+        <img class="sprite crystal" src="./assets//images/sprites/crystal.png" alt="crystal sprite">
+      </div>
+      <div class="sprite-container enemy-small">
+        <img class="sprite enemy-small" src="./assets//images/sprites/enemy-small.png" alt="small enemy sprite">
+      </div>
+      <div class="sprite-container enemy-large">
+        <img class="sprite enemy-large" src="./assets//images/sprites/enemy-large.png" alt="large enemy sprite">
+      </div>
+      <div class="sprite-container bullet bullet-1">
+        <img class="sprite bullet bullet-1" src="./assets//images/sprites/bullet.png" alt="bullet sprite">
+      </div>
+      <div class="sprite-container bullet bullet-2">
+        <img class="sprite bullet bullet-2" src="./assets//images/sprites/bullet.png" alt="bullet sprite">
+      </div>
+      <div class="sprite-container bullet bullet-3">
+        <img class="sprite bullet bullet-3" src="./assets//images/sprites/bullet.png" alt="bullet sprite">
+      </div>
+    </div>
+  </main>
 </body>
 </html>

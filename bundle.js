@@ -497,7 +497,7 @@ class Game {
 		} else {
 			this.ctx.fillStyle = 'slategrey';
 			this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
-			this.ctx.font = '20px Arial';
+			this.ctx.font = '20px Black Ops One';
 			this.ctx.fillStyle = 'white';
 			this.ctx.fillText('Game Paused', 350, 150);
 			this.ctx.fillText('Press Enter or Space to Start', 280, 200);
@@ -545,6 +545,7 @@ class Game {
 
 	// Clear enemies, bullets, and explosions. Reset score to 0 and level and multiplier to 1. Generate level 1 backgrounds.
 	reset() {
+		this.paused = true;
 		this.enemies = [];
 		this.bullets = [];
 		this.explosions = [];
@@ -557,7 +558,6 @@ class Game {
 		this.level = 1;
 		this.player.removePowerups();
 		this.generateBackground();
-		this.paused = true;
 	}
 
 	levelUp() {
@@ -798,16 +798,31 @@ class Player extends Ship {
 		if (this.powerupTimer === 0) this.removePowerups();
 
 		// Display current powerups
-		this.game.HUDCtx.font = '14px Arial';
-		this.game.HUDCtx.fillStyle = 'red';
+		this.game.HUDCtx.fillStyle = 'white';
 
-		this.game.HUDCtx.fillText('Powerup Timer:', 1050, 180);
-		if (this.activePowerups.length > 0) this.game.HUDCtx.fillText(this.powerupTimer / 100, 1050, 200);
-		this.game.HUDCtx.fillText('Active Powerups:', 1050, 250);
+		this.game.HUDCtx.font = '14px Black Ops One';
+		this.game.HUDCtx.fillText('Powerup Timer:', 1040, 180);
+		this.game.HUDCtx.fillText('Active Powerups:', 1035, 250);
+		this.game.HUDCtx.font = '12px Black Ops One';
 		this.activePowerups.forEach((powerup, i) => {
-			this.game.HUDCtx.fillText(powerup.type, 1050, 20 * (i + 14));
+			if (i < 8) {
+				this.game.HUDCtx.fillText(powerup.type, 1050, 10 + 20 * (i + 13));
+			} else if (i === 8) {
+				this.game.HUDCtx.fillText('SO MANY POWERUPS!', 1050, 10 + 20 * (i + 13));
+			}
 		});
 
+		this.game.HUDCtx.font = '22px Black Ops One';
+		if (this.activePowerups.length > 0) {
+			if (this.powerupTimer < 100) {
+				this.game.HUDCtx.fillStyle = 'red';
+			} else if (this.powerupTimer < 200) {
+				this.game.HUDCtx.fillStyle = 'orange';
+			} else if (this.powerupTimer < 300) {
+				this.game.HUDCtx.fillStyle = 'yellow';
+			}
+			this.game.HUDCtx.fillText(this.powerupTimer / 100, 1070, 220);
+		}
 		super.draw(ctx);
 	}
 
@@ -946,12 +961,12 @@ class Score {
 	}
 
 	draw(ctx) {
-		ctx.font = '18px Arial';
-		ctx.fillStyle = 'red';
-		ctx.fillText('SCORE:', 20, 200);
-		ctx.fillText(this.currentScore, 100, 200);
-		ctx.fillText('LEVEL:', 20, 230);
-		ctx.fillText(this.game.level, 90, 230);
+		ctx.font = '18px Black Ops One';
+		ctx.fillStyle = 'white';
+		ctx.fillText('SCORE:', 40, 180);
+		ctx.fillText(this.currentScore, 40, 210);
+		ctx.fillText('LEVEL:', 40, 260);
+		ctx.fillText(this.game.level, 40, 290);
 
 		this.framesDrawn++;
 		if (this.framesDrawn % 10 === 0) this.currentScore += this.multiplier;

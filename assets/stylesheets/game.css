@@ -2,7 +2,6 @@ body,
 .canvas-container {
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
 	align-items: center;
 }
 
@@ -34,7 +33,137 @@ body {
 	min-height: 100vh;
 }
 
+nav {
+	background: slategray;
+	height: 60px;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	margin-bottom: 60px;
+	box-shadow: 0px 0px 8px 0px inset rgba(0, 0, 0, 0.8);
+}
+
+.game-title {
+	position: absolute;
+	font-size: 36px;
+	color: white;
+	font-family: 'Faster One', cursive;
+	/* font-family: 'Black Ops One', cursive; */
+}
+
+.nav-links-list {
+	display: flex;
+	align-items: center;
+	margin-left: auto;
+}
+
+.nav-links-list li {
+	margin: 10px;
+}
+
+.logo {
+	width: 48px;
+	height: 48px;
+}
+
+.main-container {
+	display: flex;
+	width: 100%;
+}
+
+.sprite-group-container {
+	width: calc(50% - 600px);
+	position: relative;
+}
+
+.sprite {
+	transform-origin: top left;
+	-webkit-transform-origin: top left;
+	-ms-transform-origin: top left;
+}
+
+.sprite-container {
+	overflow: hidden;
+	position: absolute;
+}
+
+.sprite-container.ship {
+	width: 60px;
+	height: 90px;
+	top: 450px;
+	left: 40px;
+}
+
+.sprite.ship {
+	transform: rotate(270deg) translateX(-151%) translateY(-42%) scale(3, 3);
+	-webkit-transform: rotate(270deg) translateX(-151%) translateY(-42%) scale(3, 3);
+	-ms-transform: rotate(270deg) translateX(-151%) translateY(-42%) scale(3, 3);
+}
+
+.sprite-container.crystal {
+	width: 24px;
+	height: 60px;
+	top: 50px;
+	left: 180px;
+}
+
+.sprite.crystal {
+	transform: scale(4, 4);
+	-webkit-transform: scale(4, 4);
+	-ms-transform: scale(4, 4);
+}
+
+.sprite-container.enemy-small {
+	width: 64px;
+	height: 64px;
+	top: 250px;
+	left: 120px;
+}
+
+.sprite-container.enemy-large {
+	width: 128px;
+	height: 128px;
+	top: 20px;
+	left: 0px;
+}
+
+.sprite.enemy-small,
+.sprite.enemy-large {
+	transform: rotate(270deg) translateX(-100%);
+	-webkit-transform: rotate(270deg) translateX(-100%);
+	-ms-transform: rotate(270deg) translateX(-100%);
+}
+
+.sprite-container.bullet {
+	width: 16px;
+	height: 16px;
+}
+
+.sprite-container.bullet-1 {
+	top: 200px;
+	left: 30px;
+}
+
+.sprite-container.bullet-2 {
+	top: 280px;
+	left: 60px;
+}
+
+.sprite-container.bullet-3 {
+	top: 360px;
+	left: 90px;
+}
+
+.sprite.bullet {
+	transform: rotate(270deg) translateX(-100%);
+	-webkit-transform: rotate(270deg) translateX(-100%);
+	-ms-transform: rotate(270deg) translateX(-100%);
+}
+
 .canvas-container {
+	justify-content: center;
 	width: 1200px;
 	height: 600px;
 	background: darkslategray;
@@ -61,6 +190,7 @@ body {
 		); /* IE6-9 fallback on horizontal gradient */
 	box-shadow: 0px 0px 8px 8px inset rgba(0, 0, 0, 0.6);
 	border-radius: 8px;
+	position: relative;
 }
 
 canvas {
@@ -70,4 +200,22 @@ canvas {
 
 #game-canvas {
 	border: 2px solid slategray;
+}
+
+.HUD-background-box {
+	position: absolute;
+	width: 160px;
+	background: slategray;
+	top: 130px;
+	box-shadow: 0px 0px 6px 6px inset rgba(0, 0, 0, 0.4);
+}
+
+.HUD-background-box.left {
+	height: 200px;
+	left: 20px;
+}
+
+.HUD-background-box.right {
+	height: 340px;
+	right: 20px;
 }
