@@ -108,10 +108,7 @@ class Background {
 		this.img = new Image();
 		this.img.src = this.path;
 		this.img.onload = () => {
-			this.scale = Math.min(
-				this.ctx.canvas.width / this.img.naturalWidth,
-				this.ctx.canvas.height / this.img.naturalHeight
-			);
+			this.scale = this.ctx.canvas.height / this.img.naturalHeight;
 		};
 
 		this.draw = this.draw.bind(this);

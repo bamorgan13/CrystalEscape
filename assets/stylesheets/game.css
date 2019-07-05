@@ -1,15 +1,16 @@
-#game-canvas {
-	position: absolute;
-	top: 0;
-	z-index: 3;
+body,
+.canvas-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 }
-#midground-canvas {
-	position: absolute;
-	top: 0;
-	z-index: 2;
+
+.canvas-container {
+	width: 1200px;
+	height: 600px;
 }
-#background-canvas {
-	position: absolute;
-	top: 0;
-	z-index: 1;
+
+canvas {
+	position: fixed;
 }
