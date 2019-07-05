@@ -26,11 +26,11 @@ Grabbing the crystal in each level moves the player on to the next zone, where t
 - [ ] Title screen with instructions
 - [x] Ship can move along the vertical axis and fire weapon with player input
 - [x] Enemies are created and horizontal positions scroll automatically
-- [ ] Collision with enemies triggers ship destruction
-- [ ] Weapon collision with enemies triggers enemy destruction
-- [ ] Powerups affect game variables (increased speed, bullet size, etc.)
+- [x] Collision with enemies triggers ship destruction
+- [x] Weapon collision with enemies triggers enemy destruction
+- [x] Powerups affect game variables (increased speed, bullet size, etc.)
 - [ ] Collecting crystal triggers new phase with altered variables
-- [ ] Score is increased continually as player progresses through level. Bonus points awarded for destroying enemies
+- [x] Score is increased continually as player progresses through level. Bonus points awarded for destroying enemies
 
 ### Implementation Timeline
 
@@ -50,14 +50,14 @@ Grabbing the crystal in each level moves the player on to the next zone, where t
 - [x] Scrolling of background and enemies
 
 ##### Day 4:
-- [ ] Ship collision triggers destruction
-- [ ] Bullet collision with enemies causes enemy destruction
-- [ ] Powerups alter game variables
+- [x] Ship collision triggers destruction
+- [x] Bullet collision with enemies causes enemy destruction
+- [x] Powerups alter game variables
 
 ##### Day 5:
 - [ ] Crystal spawns after score threshold is met
 - [ ] Collecting crystal triggers next phase with increased game variables
-- [ ] Score is continually updated and displayed for the player
+- [x] Score is continually updated and displayed for the player
 
 ##### Bonus Goals:
 - [ ] Background music and sound effects
