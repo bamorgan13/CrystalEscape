@@ -454,6 +454,7 @@ class Game {
 		this.spawnChance = 0.3;
 		this.spawnRateFrames = 200;
 		this.level = 1;
+		this.player.removePowerups();
 		this.generateBackground();
 	}
 
