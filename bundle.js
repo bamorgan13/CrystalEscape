@@ -403,6 +403,10 @@ class Game {
 		this.gameCanvas.addEventListener('keydown', this.handleKeyDown);
 		this.throttledPress = Util.throttle(this.handleKeyPress, this.player.weaponLockout);
 		this.gameCanvas.addEventListener('keypress', this.throttledPress);
+
+		this.pauseGradient = this.ctx.createRadialGradient(400, 200, 60, 400, 200, 400);
+		this.pauseGradient.addColorStop(0, '#35fffd');
+		this.pauseGradient.addColorStop(1, '#048aac');
 	}
 
 	generateBackground() {
@@ -495,7 +499,7 @@ class Game {
 
 			this.frameIndex++;
 		} else {
-			this.ctx.fillStyle = 'slategrey';
+			this.ctx.fillStyle = this.pauseGradient;
 			this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
 			this.ctx.font = '20px Black Ops One';
 			this.ctx.fillStyle = 'white';
@@ -530,8 +534,8 @@ class Game {
 				.slice(startIdx + 1) //Prevent checking multiple times
 				.forEach(obj2 => {
 					if (obj1.isCollidedWith(obj2) && obj1.direction === -1 * obj2.direction) {
-						obj1.remove();
 						obj2.remove();
+						obj1.remove();
 					} else if (obj1.isCollidedWith(obj2) && obj1 instanceof Player && obj2 instanceof Powerup) {
 						this.player.addPowerup(obj2);
 						obj2.remove();
@@ -800,27 +804,44 @@ class Player extends Ship {
 
 		// Display current powerups
 		this.game.HUDCtx.fillStyle = 'white';
-
 		this.game.HUDCtx.font = '14px Black Ops One';
 		this.game.HUDCtx.fillText('Powerup Timer:', 1040, 180);
 		this.game.HUDCtx.fillText('Active Powerups:', 1035, 250);
 		this.game.HUDCtx.font = '12px Black Ops One';
 		this.activePowerups.forEach((powerup, i) => {
-			if (i < 8) {
+			if (i < 9) {
 				this.game.HUDCtx.fillText(powerup.type, 1050, 10 + 20 * (i + 13));
-			} else if (i === 8) {
-				this.game.HUDCtx.fillText('SO MANY POWERUPS!', 1050, 10 + 20 * (i + 13));
+			} else if (i === 9) {
+				if (this.powerupTimer % 60 < 10) {
+					this.game.HUDCtx.fillStyle = 'red';
+				} else if (this.powerupTimer % 60 < 20) {
+					this.game.HUDCtx.fillStyle = 'orange';
+				} else if (this.powerupTimer % 60 < 30) {
+					this.game.HUDCtx.fillStyle = 'yellow';
+				} else if (this.powerupTimer % 60 < 40) {
+					this.game.HUDCtx.fillStyle = 'green';
+				} else if (this.powerupTimer % 60 < 50) {
+					this.game.HUDCtx.fillStyle = 'blue';
+				} else if (this.powerupTimer % 60 < 60) {
+					this.game.HUDCtx.fillStyle = 'purple';
+				}
+				this.game.HUDCtx.fillText('SO MANY POWERUPS!', 1040, 10 + 20 * (i + 13));
 			}
 		});
 
 		this.game.HUDCtx.font = '22px Black Ops One';
+		this.game.HUDCtx.strokeStyle = 'black';
+		this.game.HUDCtx.fillStyle = 'white';
 		if (this.activePowerups.length > 0) {
 			if (this.powerupTimer < 100) {
 				this.game.HUDCtx.fillStyle = 'red';
+				this.game.HUDCtx.strokeText(this.powerupTimer / 100, 1070, 220);
 			} else if (this.powerupTimer < 200) {
 				this.game.HUDCtx.fillStyle = 'orange';
+				this.game.HUDCtx.strokeText(this.powerupTimer / 100, 1070, 220);
 			} else if (this.powerupTimer < 300) {
 				this.game.HUDCtx.fillStyle = 'yellow';
+				this.game.HUDCtx.strokeText(this.powerupTimer / 100, 1070, 220);
 			}
 			this.game.HUDCtx.fillText(this.powerupTimer / 100, 1070, 220);
 		}

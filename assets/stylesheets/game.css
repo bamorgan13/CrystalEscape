@@ -212,6 +212,7 @@ nav {
 	justify-content: center;
 	width: 1200px;
 	height: 600px;
+
 	background: #b569db; /* Old browsers */
 	background: -moz-linear-gradient(-45deg, #b569db 0%, #b95abc 30%, #a31192 62%, #8e2d54 100%); /* FF3.6-15 */
 	background: -webkit-linear-gradient(
@@ -234,6 +235,29 @@ nav {
 			GradientType=1
 		); /* IE6-9 fallback on horizontal gradient */
 
+	/* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#932419+0,b52115+30,932419+62,40180c+100 */
+	background: #932419; /* Old browsers */
+	background: -moz-linear-gradient(-45deg, #932419 0%, #b52115 30%, #932419 62%, #40180c 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(
+		-45deg,
+		#932419 0%,
+		#b52115 30%,
+		#932419 62%,
+		#40180c 100%
+	); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(
+		135deg,
+		#932419 0%,
+		#b52115 30%,
+		#932419 62%,
+		#40180c 100%
+	); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient(
+			startColorstr='#932419',
+			endColorstr='#40180c',
+			GradientType=1
+		); /* IE6-9 fallback on horizontal gradient */
+
 	box-shadow: 0px 0px 8px 8px inset rgba(0, 0, 0, 0.6);
 	border-radius: 8px;
 	position: relative;
@@ -245,13 +269,37 @@ canvas {
 }
 
 #game-canvas {
-	border: 2px solid plum;
+	border: 2px solid slategray;
 }
 
 .HUD-background-box {
 	position: absolute;
 	width: 160px;
 	background: slategray;
+
+	/* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#f19252+0,e8c294+30,f19252+62,d85a34+100 */
+	background: #f19252; /* Old browsers */
+	background: -moz-linear-gradient(-45deg, #f19252 0%, #e8c294 30%, #f19252 62%, #d85a34 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(
+		-45deg,
+		#f19252 0%,
+		#e8c294 30%,
+		#f19252 62%,
+		#d85a34 100%
+	); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(
+		135deg,
+		#f19252 0%,
+		#e8c294 30%,
+		#f19252 62%,
+		#d85a34 100%
+	); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient(
+			startColorstr='#f19252',
+			endColorstr='#d85a34',
+			GradientType=1
+		); /* IE6-9 fallback on horizontal gradient */
+
 	top: 130px;
 	box-shadow: 0px 0px 6px 6px inset rgba(0, 0, 0, 0.4);
 }
