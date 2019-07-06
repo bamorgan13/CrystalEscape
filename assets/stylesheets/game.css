@@ -172,19 +172,34 @@ nav {
 	height: 16px;
 }
 
-.sprite-container.bullet-1 {
-	top: 200px;
-	left: 30px;
+.right .sprite-container.bullet-1 {
+	top: 450px;
+	left: 80px;
 }
 
-.sprite-container.bullet-2 {
-	top: 280px;
-	left: 60px;
+.right .sprite-container.bullet-2 {
+	top: 400px;
+	left: 160px;
 }
 
-.sprite-container.bullet-3 {
-	top: 360px;
-	left: 90px;
+.right .sprite-container.bullet-3 {
+	top: 350px;
+	left: 240px;
+}
+
+.left .sprite-container.bullet-1 {
+	top: 450px;
+	right: 80px;
+}
+
+.left .sprite-container.bullet-2 {
+	top: 400px;
+	right: 160px;
+}
+
+.left .sprite-container.bullet-3 {
+	top: 350px;
+	right: 240px;
 }
 
 .sprite.bullet {

@@ -77,38 +77,73 @@
 	animation-delay: 1.5s;
 }
 
-@keyframes bullet-1 {
+@keyframes bullet-1-right {
 	to {
-		top: 150px;
-		left: 30px;
+		top: 380px;
+		left: 80px;
 	}
 }
 
-.sprite-container.bullet-1 {
-	animation-name: bullet-1;
+.right .sprite-container.bullet-1 {
+	animation-name: bullet-1-right;
 }
 
-@keyframes bullet-2 {
+@keyframes bullet-2-right {
 	to {
-		top: 230px;
-		left: 60px;
+		top: 330px;
+		left: 160px;
 	}
 }
 
-.sprite-container.bullet-2 {
-	animation-name: bullet-2;
+.right .sprite-container.bullet-2 {
+	animation-name: bullet-2-right;
 	animation-delay: 0.5s;
 }
 
-@keyframes bullet-3 {
+@keyframes bullet-3-right {
 	to {
-		top: 310px;
-		left: 90px;
+		top: 280px;
+		left: 240px;
 	}
 }
 
-.sprite-container.bullet-3 {
-	animation-name: bullet-3;
+.right .sprite-container.bullet-3 {
+	animation-name: bullet-3-right;
+	animation-delay: 1s;
+}
+
+@keyframes bullet-1-left {
+	to {
+		top: 380px;
+		right: 80px;
+	}
+}
+
+.left .sprite-container.bullet-1 {
+	animation-name: bullet-1-left;
+}
+
+@keyframes bullet-2-left {
+	to {
+		top: 330px;
+		right: 160px;
+	}
+}
+
+.left .sprite-container.bullet-2 {
+	animation-name: bullet-2-left;
+	animation-delay: 0.5s;
+}
+
+@keyframes bullet-3-left {
+	to {
+		top: 280px;
+		right: 240px;
+	}
+}
+
+.left .sprite-container.bullet-3 {
+	animation-name: bullet-3-left;
 	animation-delay: 1s;
 }
 
