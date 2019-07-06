@@ -378,9 +378,9 @@ class Game {
 		this.HUDCtx = HUDCtx;
 
 		this.frameIndex = 1;
-		this.spawnRateFrames = 200;
+		this.spawnRateFrames = 300;
 		this.minSpawnRateFrames = 50;
-		this.spawnChance = 0.3;
+		this.spawnChance = 0.6;
 		this.powerUpDropChance = 1;
 
 		this.enemies = [];
@@ -557,8 +557,8 @@ class Game {
 		this.crystals = [];
 		this.score.currentScore = 0;
 		this.score.multiplier = 1;
-		this.spawnChance = 0.3;
-		this.spawnRateFrames = 200;
+		this.spawnChance = 0.6;
+		this.spawnRateFrames = 300;
 		this.frameIndex = 1;
 		this.level = 1;
 		this.player.removePowerups();
@@ -825,7 +825,7 @@ class Player extends Ship {
 				} else if (this.powerupTimer % 60 < 60) {
 					this.game.HUDCtx.fillStyle = 'purple';
 				}
-				this.game.HUDCtx.fillText('SO MANY POWERUPS!', 1040, 10 + 20 * (i + 13));
+				this.game.HUDCtx.fillText('SO MANY POWERUPS!', 1035, 5 + 20 * (i + 13));
 			}
 		});
 
@@ -1022,7 +1022,7 @@ class Ship extends MovingObject {
 
 	fire() {
 		const pos = this.pos.slice();
-		pos[0] = this.direction > 0 ? pos[0] + this.width + 1 : pos[0] - Bullet.SPRITE_WIDTH * this.bulletScale - 1;
+		pos[0] = this.direction > 0 ? pos[0] + this.width : pos[0] - Bullet.SPRITE_WIDTH * this.bulletScale - 1;
 		pos[1] += (this.height - Bullet.SPRITE_HEIGHT * this.bulletScale) / 2;
 		const vel = [Math.max(this.vel.slice()[0], 0) + this.direction * this.bulletSpeed, 0];
 		const bullet = new Bullet({ pos, vel, game: this.game, scale: this.bulletScale, direction: this.direction });
