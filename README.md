@@ -5,7 +5,7 @@ The player pilots a spaceship, avoiding obstacles and enemies in search of cryst
 Shooting enemies can reveal powerups to alter the ship's speed or weapon.
 Grabbing the crystal in each level moves the player on to the next zone, where their ship will move faster and also be bombarded with even more enemies.
 
-![Crystal Escape Gameplay](https://github.com/bamorgan13/CrystalEscape/blob/master/documentation/CrystalEscap_screen-grab.png "Crystal Escape Gameplay")
+![Crystal Escape Gameplay](https://github.com/bamorgan13/CrystalEscape/blob/master/documentation/CrystalEscape_screen-grab.png "Crystal Escape Gameplay")
 
 ### Functionality
 * Players can press the up and down arrow keys to adjust the ship's height in order to avoid obstacles and enemies.
