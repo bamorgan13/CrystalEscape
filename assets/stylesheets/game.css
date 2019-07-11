@@ -42,6 +42,15 @@ nav {
 	margin: 10px;
 }
 
+.nav-links-list-header {
+	color: white;
+	font-family: 'Black Ops One';
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	cursor: default;
+}
+
 .logo {
 	width: 48px;
 	height: 48px;
@@ -55,6 +64,14 @@ nav {
 
 .logo.linkedin:hover {
 	background-image: url('../images/logos/linkedin-black.png');
+}
+
+.logo.angellist {
+	background-image: url('../images/logos/angellist.png');
+}
+
+.logo.angellist:hover {
+	background-image: url('../images/logos/angellist-black.png');
 }
 
 .logo.github {
