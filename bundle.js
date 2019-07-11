@@ -503,8 +503,13 @@ class Game {
 			this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
 			this.ctx.font = '20px Black Ops One';
 			this.ctx.fillStyle = 'white';
-			this.ctx.fillText('Game Paused', 350, 150);
-			this.ctx.fillText('Press Enter or Space to Start', 280, 200);
+			this.ctx.fillText('Game Paused', 330, 100);
+			this.ctx.fillText('Press Enter or Space to Start', 230, 150);
+			this.ctx.font = '18px Black Ops One';
+			this.ctx.fillText('Use WASD or Arrow keys to move', 230, 250);
+			this.ctx.fillText('Press or hold Space to fire', 260, 280);
+			this.ctx.fillText('Collect powerups from destroyed ships', 205, 310);
+			this.ctx.fillText('Score points, pick up the crystal, and advance to the next level!', 90, 340);
 		}
 	}
 
