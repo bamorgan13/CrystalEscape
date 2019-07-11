@@ -1,9 +1,11 @@
 # Crystal Escape
 
-Crystal Escape a side-scrolling space shooter reminiscent of Gradius, R-Type, and other shoot-em-ups of the 8- and 16-bit eras.
+[Crystal Escape](https://bamorgan13.github.io/CrystalEscape/ "Crystal Escape Live Site") is a side-scrolling space shooter reminiscent of Gradius, R-Type, and other shoot-em-ups of the 8- and 16-bit eras.
 The player pilots a spaceship, avoiding obstacles and enemies in search of crystals to power up their ship and make their escape back home.
 Shooting enemies can reveal powerups to alter the ship's speed or weapon.
 Grabbing the crystal in each level moves the player on to the next zone, where their ship will move faster and also be bombarded with even more enemies.
+
+![Crystal Escape Gameplay](https://github.com/bamorgan13/CrystalEscape/raw/master/documentation/CrystalEscap_screen-grab.png "Crystal Escape Gameplay")
 
 ### Functionality
 * Players can press the up and down arrow keys to adjust the ship's height in order to avoid obstacles and enemies.
